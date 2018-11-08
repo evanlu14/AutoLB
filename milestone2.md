@@ -1,7 +1,6 @@
 ## Claim
 
 - Project report
-
 - code/scripts with readme
 
 ## Features
@@ -38,18 +37,12 @@ increasing:
 What if one LB crash?
 
 1. Health checker found it
-
 2. Create a new one
-
 3. Renew DNS
-
 4. If old one keeps down
-
-5. 1. For a period time? Delete it
-
-6. If old one get healthy again
-
-7. 1. Delete new one.
+    1. For a period time? Delete it
+5. If old one get healthy again
+    1. Delete new one.
 
 What if health checker down? Too evil to consider it.
 
@@ -107,54 +100,52 @@ class LoadBalancer:
 
 ## UI
 
-users send GET request containing the json file to our server, and return corresponding result.
+Basically users communicate with our system in JSON formatted data. They send GET request containing JSON to our server, and get corresponding result. 
 
-Create a project:
+Here is the template of the request and response:
 
-```
+```json
 {
-    "action": "create"/"info"/"update"/"delete",
-    "type": "project"/"subnet"/"instance",
+    "action": ["create"/"info"/"update"/"delete"],
+    "type": ["project"/"instance"],
     "info": {
-        "name": example
+        "name": "example"
     }
 }
 ```
 
-return value:
-
 ```json
 {
-    "status": "successful"/"fail",
+    "status": ["successful"/"fail"],
     "action": "create",
     "type": "project",
     "info": {
-        "name": example,
+        "name": "example",
         "id": 1,
     }
 }
 ```
 
-### Configuration JSON File
-
-#### project
+### Project
 
 ```json
 {
-    "id": 1,
-    "name": example,
+    "type": "project",
+    "user": "john",
+    "name": "john's project",
     "instances": [],
 }
 ```
 
-#### Instance
+### Instance
 
 ```json
 {
-    "type": ["tcp"/"http"],
+    "type": "instance",
+    "traffic_type": ["tcp"/"http"],
     "backend": {
-        "entitys": [
-            [ip/entity name], ...
+        "entities": [
+            ["ip"/"url"], ...
         ],
         "health-check": {},
         "auto-scaling": true,
@@ -162,23 +153,20 @@ return value:
 }
 ```
 
-##### health check
+### health check
 
 check the status of backend servers:
 
 ```json
-"backends": {
-    "entitys": [],
-    "health-check": {
-        "protocol": ("HTTP"/"TCP"),
-        "port": 80,
-        "request-path": "/",
-        "criteria": {
-            "interval": 5,
-            "timeout": 5,
-            "health-threshold": 2,
-            "unhealth-threshold": 2
-        }
+{
+    "protocol": ["HTTP"/"TCP"],
+    "port": 80,
+    "request-path": "/",
+    "criteria": {
+        "interval": 5,
+        "timeout": 5,
+        "health-threshold": 2,
+        "unhealth-threshold": 2
     }
 }
 ```
