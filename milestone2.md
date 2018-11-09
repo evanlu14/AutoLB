@@ -48,55 +48,126 @@ What if health checker down? Too evil to consider it.
 
 ## Architecture
 
-VM
+![](./architecture.png)
 
-```c
-enum Status {Running = 0, Suspend = 1, Shutdown = 2}; 
-struct vm_info {
-    char *name,
-    int ram_size,
-    int num_vcpu,
-    Status status,
-}
-/**
-    create a VM
-    @param id assgined id of this vm.
-    @param info the information of vm.
-    @return 1 create successful
-    		0 create fail.
-*/
-int CreateVM(int *id, struct vm_info *info);
-
-/**
-	get the information of the VM	
-	@param id id of this VM
-	@return the corresponding VM
-*/
-struct vm_info *GetVM(const int id);
-
-/**
-	delete the VM	
-	@param id id of the VM
-	@return 1 delete successful
-			0 delete fail
-*/
-int DeleteVM(const int id);
-```
-
-- guest lb vm
+Controller machine:
+- process all incoming requests
+- manipulate VMs and subnets
 
 ```python
-class LoadBalancer:
-	id = -1
-    servers = []
-    healthcheck = False
-    protocal = ""
-	def __init__(self, ):
+class Controller:
+    def __init__(self):
+        """
+        """
+        self.projects = {}
+    
+    def add_project(self, user: string, project: Project):
+        """ add a new project
+        Parameters:
+        user: user 
+        project: project to be added
+        """
+        if self.projects.has_key(user):
+            self.projects[user].append(project)
+        else:
+            self.proejcts[user] = [project]
+    
+    def remove_project(self, user, project: Project):
+        """ remove a project
+        """
+
+    def update_info_all(self):
+        """ update all projects status
+        """
+
+    def update_info(self, project: Project):
+        """ read collected log to update the status
+        """
 ```
 
-- bridge
-- DNS server
-- health checker vm
+```python
+class Project:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.subnet = Subnet()
+        self.vms = []
+
+    def init_subnet(self):
+        """ create and initializa a network namespace
+        """
+        self.subnet.initialize()
+    
+    def add_vm(self, vm: VM):
+        """ attach a new VM in the current project
+        """
+        self.subnet.add_vm(vm)
+        self.vms.append(vm)
+
+    def remove_vm(self, vm: VM):
+        """ remove a VM from the current project
+        """
+        self.subnet.remove_vm(vm)
+        self.vms.remove(vm)
+```
+
+```python
+class Subnet:
+    def __init__(self):
+        self.name = ""
+        self.id = -1
+
+    def initializa(self):
+        """ create a new network namespace
+        """
+
+    def add_vm(self, vm: VM):
+        """ create a new L2 bridge and attach to the namespace
+        """
+
+    def remove_vm(self, vm: VM):
+        """ detach and destroy corresponding bridge
+        """
+```
+
+```python
+_VMCONFIG = {
+    "vcpu": 4,
+    "disk_size": 10
+}
+
+class VM:
+    def __init__(self):
+        self.id = -1
+
+    def create(self):
+        """ create a new VM
+        """
+
+    def delete(self):
+        """ delete it
+        """
+
+    def initializa(self):
+        """ install packets, collected and configure
+        """
+    
+    def add_backend(self, ip: string):
+        """ add a backend server
+        """
+    
+    def remove_backend(self, ip: string):
+        """ remove a backend server
+        """
+    
+    def update_backend(self, old_ip: string, new_ip: string):
+        """ update a bacend server
+        """
+    
+    def attach_to_subnet(self):
+        """ attack to subnet
+        """
+```
 
 ## UI
 
