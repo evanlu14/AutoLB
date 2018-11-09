@@ -48,6 +48,8 @@ What if health checker down? Too evil to consider it.
 
 ## Architecture
 
+![](./architecture.png)
+
 Controller machine:
 - process all incoming requests
 - manipulate VMs and subnets
@@ -72,6 +74,14 @@ class Controller:
     
     def remove_project(self, user, project: Project):
         """ remove a project
+        """
+
+    def update_info_all(self):
+        """ update all projects status
+        """
+
+    def update_info(self, project: Project):
+        """ read collected log to update the status
         """
 ```
 
@@ -139,11 +149,19 @@ class VM:
         """
 
     def initializa(self):
-        """ install packets and so on
+        """ install packets, collected and configure
         """
     
-    def add_backend_server(self, ip: string):
+    def add_backend(self, ip: string):
         """ add a backend server
+        """
+    
+    def remove_backend(self, ip: string):
+        """ remove a backend server
+        """
+    
+    def update_backend(self, old_ip: string, new_ip: string):
+        """ update a bacend server
         """
     
     def attach_to_subnet(self):
