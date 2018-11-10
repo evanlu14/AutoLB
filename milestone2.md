@@ -214,6 +214,7 @@ Here is the template of the request and response:
 {
     "type": "instance",
     "traffic_type": ["tcp"/"http"],
+    "subnet": "1.1.1.0/24",
     "backend": {
         "entities": [
             ["ip"/"url"], ...
