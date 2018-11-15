@@ -1,0 +1,7 @@
+{
+    "action": "create",
+    "type": "instance",
+    "info": {
+        "name": "instance-name"
+    }
+}

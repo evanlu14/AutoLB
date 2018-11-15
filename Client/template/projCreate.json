@@ -1,0 +1,7 @@
+{
+    "action": "create",
+    "type": "project",
+    "info": {
+        "name": "project-name"
+    }
+}

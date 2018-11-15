@@ -1,0 +1,7 @@
+{
+    "action": "update",
+    "type": "instance",
+    "info": {
+        "name": "instance-name"
+    }
+}
