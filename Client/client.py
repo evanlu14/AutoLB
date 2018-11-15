@@ -8,7 +8,7 @@ with open(fileAddress) as f:
     data = json.load(f)
 
 server = "http://localhost:8000"
-url = server + "/LB/" + data["type"] + "/" + data["action"]
+url = server + "/LB/" + data["type"] + "/"
 headers = {
     'Content-type': 'application/json', 
     'Accept': 'text/plain'

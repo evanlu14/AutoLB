@@ -1,0 +1,7 @@
+{
+    "action": "info",
+    "type": "instance",
+    "info": {
+        "name": "instance-name"
+    }
+}

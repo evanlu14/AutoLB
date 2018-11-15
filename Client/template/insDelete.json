@@ -1,0 +1,7 @@
+{
+    "action": "delete",
+    "type": "instance",
+    "info": {
+        "name": "instance-name"
+    }
+}
