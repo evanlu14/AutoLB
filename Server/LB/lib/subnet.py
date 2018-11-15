@@ -1,4 +1,10 @@
-class Subnet:
+from django.db import models
+
+MAX_NAME_LENGTH = 50
+class Subnet(models.Model):
+    ip = models.CharField(max_length=MAX_NAME_LENGTH)
+    vms = models.ForeignKey('VM', on_delete = models.CASCADE)
+
     def __init__(self):
         self.name = ""
         self.id = -1

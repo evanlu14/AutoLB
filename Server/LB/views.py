@@ -15,6 +15,7 @@ def project(request):
     input = json.loads(request.body)
     if(input["action"] == "create"):
         print("project create...")
+        project = Project.create(input['user'], input['info']['name'])
     if(input["action"] == "info"):
         print("project info...")
     if(input["action"] == "update"):
