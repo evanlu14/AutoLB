@@ -1,0 +1,15 @@
+# ansible-playbook delete.yml --extra-vars "target_vm=vm1"
+---
+- hosts: localhost
+  gather_facts: no
+  vars: 
+    target_vm: "{{ target_vm }}"
+  tasks:
+    - name: stop the target vm
+      command: sudo virsh destroy "{{ target_vm }}"
+
+    - name: delete target_vm
+      command: sudo virsh undefine "{{ target_vm }}"  --remove-all-storage
+      become: yes
+      become_method: sudo
+      
