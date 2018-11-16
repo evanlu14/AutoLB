@@ -1,4 +1,4 @@
-# ansible-playbook create.yml --extra-vars "target_vm=vm1"
+# ansible-playbook create.yml --extra-vars "target_vm=vm_test"
 ---
 - hosts: localhost
   gather_facts: no
@@ -6,7 +6,7 @@
     target_vm: "{{ target_vm }}"
   tasks:
     - name: copy template_vm to target_vm
-      command: sudo virt-clone --original template_vm --name "{{ target_vm }}"  --auto-clone
+      command: sudo virt-clone --original zlu24vm1 --name "{{ target_vm }}"  --auto-clone
 
     - name: restart target_vm
       command: virsh start "{{ target_vm }}"

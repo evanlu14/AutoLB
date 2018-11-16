@@ -1,4 +1,4 @@
-# ansible-playbook delete.yml --extra-vars "target_vm=vm1"
+# ansible-playbook delete.yml --extra-vars "target_vm=vm_test"
 ---
 - hosts: localhost
   gather_facts: no

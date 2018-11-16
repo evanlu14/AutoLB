@@ -1,0 +1,14 @@
+# sudo ansible-playbook config.yml -i hosts --extra-vars "ip1=1.1.4.2/24 ip2=1.1.4.1"
+---
+- hosts: VMs
+  gather_facts: no
+  tasks:
+    - name: configure IP on bridge devices
+      command: "{{ item }}"
+      with_items:
+        - sudo ip addr add {{ ip1 }} dev eth1
+        - sudo ip link set dev eth1 up
+        - sudo ip route del default
+        - sudo ip route add default via {{ ip2 }} dev eth1
+      become: yes
+      become_method: sudo

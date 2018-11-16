@@ -1,0 +1,32 @@
+# define a bridge and define the network
+# ansible-playbook create_net.yml --extra-vars "net_name=net_test br_name=br_test template_net=net_test.xml"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Ansible create file with content example
+      copy:
+        dest: "{{playbook_dir}}/{{ template_net }}"
+        content: |
+          <network> 
+            <name>{{ net_name }}</name> 
+            <forward mode='bridge'/> 
+            <bridge name='{{ br_name }}'/> 
+          </network>
+
+    - name: Define the network internet
+      virt_net:
+       command: define
+       name: "{{ net_name }}"
+       xml: '{{ lookup("template", template_net ) }}'
+       state: present
+
+    - name: Start the network Internet
+      virt_net:
+       state: active
+       name: "{{ net_name }}"
+
+    - name: create the bridge
+      command: brctl addbr "{{ br_name }}"
+      become: yes
+      become_method: sudo
