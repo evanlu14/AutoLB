@@ -1,0 +1,20 @@
+# delete the bridge and delete the network
+# ansible-playbook delete_net.yml --extra-vars "net_name=net_test br_name=br_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: stop the network
+      virt_net:
+       command: destroy
+       name: "{{ net_name }}"
+
+    - name: undefine the network 
+      virt_net:
+       command: undefine
+       name: "{{ net_name }}"
+
+    - name: delete the bridge
+      command: brctl delbr "{{ br_name }}"
+      become: yes
+      become_method: sudo

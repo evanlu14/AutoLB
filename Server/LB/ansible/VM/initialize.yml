@@ -1,0 +1,22 @@
+# create a template virtual machine and let it ready for clone.
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    # check if the os image exists
+    - name: Check if the OS image exists
+      stat: path=/home/CentOS-7-x86_64-Minimal-1804.iso
+      register: image
+
+    - name: Go to the folder /home and Download OS image
+      command: chdir=/home/ wget http://www.mirrorservice.org/sites/mirror.centos.org/7.5.1804/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso
+      become: yes
+      when: not image.stat.exists
+
+    - name: create template_vm
+      command: virt-install -n template_vm -r 2048 --vcpu=4 --cpu host --disk path=/var/lib/libvirt/images/template_vm.img,size=6 --network network=template_internet -c /home/CentOS-7-x86_64-Minimal-1804.iso -v
+      become: yes
+      become_method: sudo
+
+    - name: shut down template_vm
+      command: sudo virsh destroy template_vm
