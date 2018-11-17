@@ -3,10 +3,10 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .lib.project import Project
-from .lib.subnet import Subnet
-from .lib.vm import VM
-from .lib.controller import Controller
+from .models.project import Project
+from .models.subnet import Subnet
+from .models.vm import VM
+from .models.controller import Controller
 
 
 # Create your views here.
@@ -44,6 +44,7 @@ def instance(request):
 
     if(input["action"] == "create"):
         print("instance create...")
+        instance = VM.create()
     if(input["action"] == "info"):
         print("instance info...")
     if(input["action"] == "update"):

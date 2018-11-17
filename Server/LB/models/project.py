@@ -1,20 +1,33 @@
 from django.db import models
+from .util import _create_ns, _get_ns_name
 
 MAX_NAME_LENGTH = 50
 class Project(models.Model):
     user = models.CharField(max_length=MAX_NAME_LENGTH)
     # project name
     name = models.CharField(max_length=MAX_NAME_LENGTH)
-    subnets = models.ForeignKey('Subnet', on_delete = models.CASCADE)
-
-    def __init__(self, user, name):
-        self.user = user
-        self.name = name
 
     @classmethod
     def create(cls, user, name):
-        project = Project(user, name)
+        project = Project(user=user, name=name)
+
+        # save to db
+        project.save()
+
+        # create project ns
+        project.create_ns()
+
         return project
+
+    def __str__(self):
+        return "id: " + str(self.pk) + ", user: " + self.user + ", name: " + self.name 
+
+    def create_ns(self):
+        ns_name = self.get_ns_name()
+        _create_ns(ns_name)
+
+    def get_ns_name(self):
+        return _get_ns_name(self.user, self.name, self.pk)
 
     # def init_subnet(self):
     #     """ create and initializa a network namespace
@@ -32,3 +45,6 @@ class Project(models.Model):
     #     """
     #     self.subnet.remove_vm(vm)
     #     self.vms.remove(vm)
+
+    def info(self):
+        pass

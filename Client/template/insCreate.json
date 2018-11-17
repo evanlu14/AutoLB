@@ -1,7 +1,16 @@
 {
     "action": "create",
     "type": "instance",
+    "user": "project-name",
+    "project": "test",
     "info": {
-        "name": "instance-name"
+        "traffic_type": "http",
+        "subnet": "1.1.1.0/24",
+        "backend": {
+            "entities": [
+                "1.1.1.1", "2.2.2.2", "3.3.3.3"
+            ],
+            "health-check": false
+        }
     }
 }
