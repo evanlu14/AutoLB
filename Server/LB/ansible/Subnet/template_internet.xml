@@ -1,0 +1,15 @@
+<network>
+  <name>template_internet</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='tbr'/>
+  <virtualport type='openvswitch'/>
+  <ip address='192.168.50.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.50.2' end='192.168.50.254'/>
+    </dhcp>
+  </ip>
+</network>

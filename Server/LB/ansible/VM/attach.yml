@@ -1,0 +1,24 @@
+# ansible-playbook attach.yml --extra-vars "vm=vm_test bridge_name=br_test target=proj0 ip_int3=1.1.4.1/24"
+# validate: sudo ip netns exec {target_proj}ns ip link show
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Add NIC to VM
+      command: "virsh attach-interface --domain {{ vm }} --type bridge --source {{ bridge_name }} --model virtio  --live --config"
+      become: yes
+      become_method: sudo
+    
+    - name: create a veth pair and attach br and namespace
+      command: "{{ item }}"
+      with_items: 
+        - ip link add {{target}}int3 type veth peer name {{target}}int4
+        - ip link set {{target}}int3 netns {{target}}ns
+        - ip netns exec {{target}}ns ip addr add {{ ip_int3 }} dev {{target}}int3        
+        - ip netns exec {{target}}ns ip link set dev {{target}}int3 up
+        - brctl addif {{ bridge_name }} {{target}}int4
+        - ip link set dev {{ bridge_name }} up
+        - ip link set dev {{target}}int4 up
+        - sudo ip netns exec {{target}}ns iptables -t nat -A POSTROUTING -o {{target}}int1 -j MASQUERADE
+      become: yes
+      become_method: sudo

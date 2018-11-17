@@ -1,0 +1,18 @@
+# ansible-playbook dettach.yml --extra-vars "target=proj0 vm=vm_test mac_addr= "
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: detach NICs to VMs
+      command: "virsh detach-interface --domain {{ vm }} --type bridge --mac {{ mac_addr }} --live --config"
+      become: yes
+      become_method: sudo
+
+    - name: detach a veth pair
+      command: "{{ item }}"
+      with_items: 
+        - ip netns exec {{ target }}ns ip link set dev {{target}}int3 down
+        - ip link set dev {{target}}int4 down
+        - ip netns exec {{ target }}ns ip link delete {{target}}int3
+      become: yes
+      become_method: sudo

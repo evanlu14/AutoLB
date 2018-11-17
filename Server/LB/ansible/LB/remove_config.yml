@@ -1,0 +1,13 @@
+# sudo ansible-playbook remove_config.yml -i hosts
+# while true; do curl -m1 [IP_ADDRESS]; done
+---
+- hosts: LBs
+  gather_facts: no
+  tasks:
+    - name: remove ip configure
+      command: "{{ item }}"
+      with_items: 
+        - sudo iptables -t nat -F
+      become: yes
+      become_method: sudo
+      
