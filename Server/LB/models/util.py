@@ -1,11 +1,15 @@
-from ansible import playbook, callbacks
+# from ansible import playbook, callbacks
 
 # namespace
 def _create_ns(ns_name):
-    stats = _run_playbook(
-        playbook_path='/SOME/PATH/book.yml',
-        hosts_path='/SOME/OTHER/PATH/ansible_hosts',
-        key_file='/OTHER/PATH/keys/id_rsa.pub')
+    path = "../ansible/Subnet/create_ns.yml"
+    # stats = _run_playbook(
+    #     playbook_path=path,
+    #     hosts_path='/SOME/OTHER/PATH/ansible_hosts',
+    #     key_file='/OTHER/PATH/keys/id_rsa.pub')
+    return 0
+
+def _remove_ns(ns_name):
     pass
 
 def _get_ns_name(user, proj_name, id):
@@ -27,11 +31,11 @@ def _run_playbook(playbook_path, hosts_path, key_file):
     runner_cb = callbacks.PlaybookRunnerCallbacks(stats, verbose=0)
     playbook.PlayBook(
         playbook=playbook_path,
-        host_list=hosts_path,
+        # host_list=hosts_path,
         stats=stats,
         forks=4,
         callbacks=playbook_cb,
         runner_callbacks=runner_cb,
-        private_key_file=key_file
+        # private_key_file=key_file
         ).run()
     return stats

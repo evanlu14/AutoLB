@@ -13,29 +13,30 @@ from .models.controller import Controller
 @csrf_exempt
 def project(request):
     input = json.loads(request.body)
-    if(input["action"] == "create"):
-        print("project create...")
-        project = Project.create(input['user'], input['info']['name'])
-    if(input["action"] == "info"):
-        print("project info...")
-    if(input["action"] == "update"):
-        print("project update...")
-    if(input["action"] == "delete"):
-        print("project delete...")
-    
+
     status = "successful"
-
-
     action = input["action"]
     type = input["type"]
     res = {
         "status": status,
         "action": action,
         "type": type,
-        "info": {
-            "id": 1,
-        }
+        "info": {}
     }
+
+    if(input["action"] == "create"):
+        print("project create...")
+        project = Project.create(input['user'], input['info']['name'])
+        res["info"]["id"] = project.get_id()
+    if(input["action"] == "info"):
+        print("project info...")
+    if(input["action"] == "update"):
+        print("project update...")
+    if(input["action"] == "delete"):
+        print("project delete...")
+    if(input["action"] == "list"):
+        res["info"] = Project.listall()
+    
     return HttpResponse(json.dumps(res))
 
 @csrf_exempt

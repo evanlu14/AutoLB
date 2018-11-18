@@ -1,6 +1,8 @@
 from django.db import models
 from .util import _create_ns, _get_ns_name
+import logging
 
+logger = logging.getLogger(__name__)
 MAX_NAME_LENGTH = 50
 class Project(models.Model):
     user = models.CharField(max_length=MAX_NAME_LENGTH)
@@ -9,13 +11,16 @@ class Project(models.Model):
 
     @classmethod
     def create(cls, user, name):
-        project = Project(user=user, name=name)
+        try:
+            project = Project.objects.get(user=user, name=name)
+        except Project.DoesNotExist:
+            project = Project(user=user, name=name)
 
-        # save to db
-        project.save()
+            # save to db
+            project.save()
 
-        # create project ns
-        project.create_ns()
+            # create project ns
+            project.create_ns()
 
         return project
 
@@ -26,8 +31,21 @@ class Project(models.Model):
         ns_name = self.get_ns_name()
         _create_ns(ns_name)
 
+    def remove_ns(self):
+        ns_name = self.get_ns_name()
+        _remove_ns(ns_name)
+
     def get_ns_name(self):
         return _get_ns_name(self.user, self.name, self.pk)
+
+    @classmethod
+    def listall(cls): 
+        res =[str(item) for item in Project.objects.all()]
+        # logger.info(res)
+        return res
+
+    def get_id(self):
+        return self.pk
 
     # def init_subnet(self):
     #     """ create and initializa a network namespace

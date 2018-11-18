@@ -1,23 +1,37 @@
 from django.db import models
 from .project import Project
+import logging
 
+logger = logging.getLogger(__name__)
 MAX_NAME_LENGTH = 50
 class Subnet(models.Model):
     ip = models.CharField(max_length=MAX_NAME_LENGTH)
-    project_id = models.ForeignKey('Project', on_delete = models.CASCADE)
-
-    def __init__(self, ip, user, proj_name):
-        project = Project.objects.get(user=user, name=proj_name)
-        self.project = project
-        self.ip = ip
-
+    project = models.ForeignKey('Project', on_delete = models.CASCADE)
 
     @classmethod
-    def create(cls, ip, proj_name):
+    def create(cls, ip, user, proj_name):
         """ create a new VM
         """
-        vm = Subnet(ip, user, proj_name)
-        return vm
+        try:
+            project = Project.objects.get(user=user, name=proj_name)
+        except Project.DoesNotExist:
+            project = Project.create(user=user, name=proj_name)
+
+        subnet = Subnet(ip = ip, project = project)
+
+        # save to db
+        subnet.save()
+
+        return subnet
+
+    def __str__(self):
+        return "id: " + str(self.pk) + ", ip: " + self.ip + ", project: " + self.project
+
+    @classmethod
+    def listall(cls): 
+        res =[str(item) for item in Subnet.objects.all()]
+        # logger.info(res)
+        return res
 
     def initializa(self):
         """ create a new network namespace
