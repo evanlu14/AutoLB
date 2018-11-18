@@ -1,11 +1,11 @@
 <network>
-  <name>template_internet</name>
+  <name>admin_net</name>
   <forward mode='nat'>
     <nat>
       <port start='1024' end='65535'/>
     </nat>
   </forward>
-  <bridge name='tbr'/>
+  <bridge name='admin_br'/>
   <virtualport type='openvswitch'/>
   <ip address='192.168.50.1' netmask='255.255.255.0'>
     <dhcp>
