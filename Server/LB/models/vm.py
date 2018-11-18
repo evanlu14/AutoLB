@@ -29,38 +29,45 @@ class VM(models.Model):
         vm.save()
 
         vm.create_vm()
+        vm.attach_to_ns()
+        vm.config_lb()
 
         return vm
 
-    def create_vm(self):
-        pass
-
     def delete(self):
-        """ delete it
+        self.delete_vm()
+        self.detach_to_ns()
+
+    def info(self):
+        res = {
+                "subnet": subnet,
+                "traffic": traffic,
+                "backends": backends,
+                "healthcheck", healthcheck
+        }
+        return res
+
+    def create_vm(self):
+        """ just create
         """
         pass
 
-    def initializa(self):
-        """ install packets, collected and configure
+    def attach_to_ns(self):
+        """ create L2, attach vm to L2 and L2 to ns
         """
         pass
-    
-    def add_backend(self, ip):
-        """ add a backend server
+
+    def config_lb(self):
+        """ config lb on vm
         """
         pass
-    
-    def remove_backend(self, ip):
-        """ remove a backend server
+
+    def detach_to_ns(self):
+        """ detach vm to L2, l2 to ns, delete l2
         """
         pass
-    
-    def update_backend(self, old_ip, new_ip):
-        """ update a bacend server
-        """
-        pass
-    
-    def attach_to_subnet(self):
-        """ attack to subnet
+
+    def delete_vm(self):
+        """ delete the vm
         """
         pass

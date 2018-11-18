@@ -7,12 +7,12 @@ from .models.project import Project
 from .models.subnet import Subnet
 from .models.vm import VM
 from .models.controller import Controller
-
+import chardet
 
 # Create your views here.
 @csrf_exempt
 def project(request):
-    input = json.loads(request.body)
+    input = json.loads(request.body.decode(chardet.detect(request.body)["encoding"]))
 
     status = "successful"
     action = input["action"]

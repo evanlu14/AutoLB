@@ -24,6 +24,24 @@ class Project(models.Model):
 
         return project
 
+    def delete(self):
+        for subnet in self.subnet_set.all():
+            for vm in subnet.vm_set.all():
+                vm.delete()
+        self.delete_ns()
+
+    def info(self):
+        res = {
+                "user": self.user,
+                "name": self.name,
+                "vms": []
+        }
+        for subnet in self.subnet_set.all():
+            for vm in subnet.vm_set.all():
+                vm_info = vm.info()
+                res["vms"].append(vm_info)
+        return res
+
     def __str__(self):
         return "id: " + str(self.pk) + ", user: " + self.user + ", name: " + self.name 
 
@@ -31,7 +49,7 @@ class Project(models.Model):
         ns_name = self.get_ns_name()
         _create_ns(ns_name)
 
-    def remove_ns(self):
+    def delete_ns(self):
         ns_name = self.get_ns_name()
         _remove_ns(ns_name)
 
@@ -46,23 +64,3 @@ class Project(models.Model):
 
     def get_id(self):
         return self.pk
-
-    # def init_subnet(self):
-    #     """ create and initializa a network namespace
-    #     """
-    #     self.subnet.initialize()
-    
-    # def add_vm(self, vm):
-    #     """ attach a new VM in the current project
-    #     """
-    #     self.subnet.add_vm(vm)
-    #     self.vms.append(vm)
-
-    # def remove_vm(self, vm):
-    #     """ remove a VM from the current project
-    #     """
-    #     self.subnet.remove_vm(vm)
-    #     self.vms.remove(vm)
-
-    def info(self):
-        pass
