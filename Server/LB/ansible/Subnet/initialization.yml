@@ -6,11 +6,11 @@
     - name: Define the network internet in NAT / DHCP mode
       virt_net:
        command: define
-       name: template_internet
-       xml: '{{ lookup("template", "template_internet.xml") }}'
+       name: admin_net
+       xml: '{{ lookup("template", "admin_net.xml") }}'
        state: present
 
     - name: Start the network Internet
       virt_net:
        state: active
-       name: template_internet
+       name: admin_net
