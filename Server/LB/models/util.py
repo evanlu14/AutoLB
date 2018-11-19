@@ -1,4 +1,7 @@
 # from ansible import playbook, callbacks
+from os import listdir
+from os.path import isfile, join
+import subprocess
 
 # namespace
 def _create_ns(ns_name):
@@ -22,7 +25,34 @@ def _create_vm(vm_name):
     pass
 
 def _get_vm_name(user, proj_name, id):
-    return user + proj_name + id
+    return _get_ns_name(user, proj_name, id)
+    # return user + proj_name + id
+
+def _collectd_info(vm_name):
+    res = {"if": {}, "memory": [], "cpu": []}
+
+    BASE_PATH = "/var/lib/collectd/csv/"
+    path = join(BASE_PATH, vm_name)
+    path = join(path, "virt-" + vm_name)
+    
+    for f in listdir(path):
+        fullpath = join(path, f)
+        if f.startswith("if_packets"):
+            ifname = f.split("-")[1]
+            res["if"][ifname] = tail(fullpath, 10)
+        elif f.startswith("memory-available"):
+            res["memory"] = tail(fullpath, 10)
+        elif f.startswith("virt_cpu_total"):
+            res["cpu"] = tail(fullpath,10)
+
+    return res
+
+def tail(f, n):
+    num = str(n)
+    proc = subprocess.Popen(['tail', '-n', num, f], stdout=subprocess.PIPE)
+    lines = proc.stdout.readlines()
+    lines = [line.decode("utf-8").strip("\n") for line in lines]
+    return lines[-n:]
 
 # ansible
 def _run_playbook(playbook_path, hosts_path, key_file):
