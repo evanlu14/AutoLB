@@ -7,10 +7,10 @@
     - name: configure PRE-ROUTING
       command: "{{ item }}"
       with_items: 
-        - iptables -t nat -A PREROUTING -p tcp  -i eth1 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 0 -j DNAT --to-destination 35.237.181.53
-        - iptables -t nat -A PREROUTING -p tcp  -i eth1 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 1 -j DNAT --to-destination 35.196.112.92 
-        - iptables -t nat -A PREROUTING -p tcp  -i eth1 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 2 -j DNAT --to-destination 35.227.124.229
-        - iptables -t nat -A POSTROUTING -s "{{ s_ip }}" -o eth0 -j MASQUERADE
+        - iptables -t nat -A PREROUTING -p tcp  -i eth0 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 0 -j DNAT --to-destination 35.237.181.53
+        - iptables -t nat -A PREROUTING -p tcp  -i eth0 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 1 -j DNAT --to-destination 35.196.112.92 
+        - iptables -t nat -A PREROUTING -p tcp  -i eth0 --dport 80 -m state --state NEW -m statistic --mode nth --every 3 --packet 2 -j DNAT --to-destination 35.227.124.229
+        - iptables -t nat -A POSTROUTING -s "{{ s_ip }}" -o eth1 -j MASQUERADE
       become: yes
       become_method: sudo
 
