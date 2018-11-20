@@ -3,38 +3,40 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .lib.project import Project
-from .lib.subnet import Subnet
-from .lib.vm import VM
-from .lib.controller import Controller
-
+from .models.project import Project
+from .models.subnet import Subnet
+from .models.vm import VM
+from .models.controller import Controller
+import chardet
 
 # Create your views here.
 @csrf_exempt
 def project(request):
-    input = json.loads(request.body)
-    if(input["action"] == "create"):
-        print("project create...")
-    if(input["action"] == "info"):
-        print("project info...")
-    if(input["action"] == "update"):
-        print("project update...")
-    if(input["action"] == "delete"):
-        print("project delete...")
-    
+    input = json.loads(request.body.decode(chardet.detect(request.body)["encoding"]))
+
     status = "successful"
-
-
     action = input["action"]
     type = input["type"]
     res = {
         "status": status,
         "action": action,
         "type": type,
-        "info": {
-            "id": 1,
-        }
+        "info": {}
     }
+
+    if(input["action"] == "create"):
+        print("project create...")
+        project = Project.create(input['user'], input['info']['name'])
+        res["info"]["id"] = project.get_id()
+    if(input["action"] == "info"):
+        print("project info...")
+    if(input["action"] == "update"):
+        print("project update...")
+    if(input["action"] == "delete"):
+        print("project delete...")
+    if(input["action"] == "list"):
+        res["info"] = Project.listall()
+    
     return HttpResponse(json.dumps(res))
 
 @csrf_exempt
@@ -43,6 +45,7 @@ def instance(request):
 
     if(input["action"] == "create"):
         print("instance create...")
+        instance = VM.create()
     if(input["action"] == "info"):
         print("instance info...")
     if(input["action"] == "update"):
