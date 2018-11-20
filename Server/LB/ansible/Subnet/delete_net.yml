@@ -15,7 +15,7 @@
        name: "{{ net_name }}"
 
     - name: set down the bridge
-      command: ip link set down "{{ br_name }}""
+      command: ip link set down "{{ br_name }}"
       become: yes
       become_method: sudo
 
