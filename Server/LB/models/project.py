@@ -16,20 +16,25 @@ class Project(models.Model):
             project = Project.objects.get(user=user, name=name)
         except Project.DoesNotExist:
             project = Project(user=user, name=name)
-
             # save to db
             project.save()
-
+            
             # create project ns
             project.create_ns()
 
         return project
 
-    def delete(self):
-        for subnet in self.subnet_set.all():
+    def delete(self, user, name):
+        try:
+            project = Project.objects.get(user=user, name=name)
+        except Project.DoesNotExist:
+            print("project doesn't exist...")
+            return 
+
+        for subnet in project.subnet_set.all():
             for vm in subnet.vm_set.all():
                 vm.delete()
-        self.delete_ns()
+        project.delete_ns()
 
     def info(self):
         res = {

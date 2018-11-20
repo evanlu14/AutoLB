@@ -1,6 +1,7 @@
 {
     "action": "delete",
     "type": "project",
+    "user": "dtest",
     "info": {
         "name": "dproj"
     }

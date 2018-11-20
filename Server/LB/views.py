@@ -35,6 +35,7 @@ def project(request):
         print("project update...")
     if(input["action"] == "delete"):
         print("project delete...")
+        Project().delete(input['user'], input['info']['name'])
 
     if(input["action"] == "list"):
         res["info"] = Project.listall()
@@ -67,7 +68,7 @@ def instance(request):
         print("instance info...")
     if(input["action"] == "update"):
         print("instance update...")
-        
+
     if(input["action"] == "delete"):
         print("instance delete...")
         VM().delete(input["info"]["name"])
