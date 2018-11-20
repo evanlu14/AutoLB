@@ -1,5 +1,5 @@
 from django.db import models
-from .util import _create_ns, _get_ns_name
+import util
 import logging
 
 logger = logging.getLogger(__name__)
@@ -47,14 +47,14 @@ class Project(models.Model):
 
     def create_ns(self):
         ns_name = self.get_ns_name()
-        _create_ns(ns_name)
+        util._create_ns(ns_name)
 
     def delete_ns(self):
         ns_name = self.get_ns_name()
-        _remove_ns(ns_name)
+        util._remove_ns(ns_name)
 
     def get_ns_name(self):
-        return _get_ns_name(self.user, self.name, self.pk)
+        return util._get_ns_name(self.user, self.name, self.pk)
 
     @classmethod
     def listall(cls): 

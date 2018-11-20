@@ -1,7 +1,7 @@
 from django.db import models
 from .project import Project
 from .subnet import Subnet
-from .util import *
+import util
 
 MAX_NAME_LENGTH = 50
 class VM(models.Model):
@@ -34,8 +34,8 @@ class VM(models.Model):
 
         return vm
 
-    def delete(self):
-        self.delete_vm()
+    def delete(self, vm_name):
+        self.delete_vm(vm_name)
         self.detach_to_ns()
 
     def info(self):
@@ -50,8 +50,8 @@ class VM(models.Model):
     def create_vm(self, user, proj_name, id):
         """ just create
         """
-        name = _get_vm_name(user, proj_name, id)
-        _create_vm(name)
+        name = util._get_vm_name(user, proj_name, id)
+        util._create_vm(name)
 
     def attach_to_ns(self):
         """ create L2, attach vm to L2 and L2 to ns
@@ -75,4 +75,4 @@ class VM(models.Model):
         playbook_path = os.path.join(cur_dir, '../ansible/VM/delete.yml')
         hosts_path = os.path.join(cur_dir, '../ansible/hosts')
         extra_vars = {"target_vm": vm_name}
-        _run_playbook(playbook_path, hosts_path, extra_vars)
+        util._run_playbook(playbook_path, hosts_path, extra_vars)
