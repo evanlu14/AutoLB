@@ -2,6 +2,6 @@
     "action": "delete",
     "type": "instance",
     "info": {
-        "name": "dvm"
+        "name": "py_test"
     }
 }

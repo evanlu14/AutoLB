@@ -15,16 +15,20 @@ from ansible.executor.playbook_executor import PlaybookExecutor
 # namespace
 def _create_ns(ns_name):
     cur_dir = os.path.abspath('./')
-    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/create_ns.yml')
-    hosts_path = os.path.join(cur_dir, '../ansible/hosts')
+    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/Subnet/create_ns.yml'))
+    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
+    
+    source = "1.1.9.0/24"
+    ip_int1 = "1.1.9.2/24"
+    ip_int2 = "1.1.9.1/24"
+    extra_vars = {"target_proj":ns_name, "ip_int1": ip_int1, "ip_int2": ip_int2, "source": source}
 
-    extra_vars = {"target_proj":ns_name, "ip_int1":"1.1.9.2/24", "ip_int2":"1.1.9.1/24", "source":"1.1.9.0/24"}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
 def _remove_ns(ns_name):
     cur_dir = os.path.abspath('./')
-    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/delete_ns.yml')
-    hosts_path = os.path.join(cur_dir, '../ansible/hosts')
+    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/Subnet/delete_ns.yml'))
+    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
     extra_vars = {"target_proj":ns_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
@@ -36,8 +40,8 @@ def _get_ns_name(user, proj_name, id):
 # vm
 def _create_vm(vm_name):
     cur_dir = os.path.abspath('./')
-    playbook_path = os.path.join(cur_dir, '../ansible/VM/create.yml')
-    hosts_path = os.path.join(cur_dir, '../ansible/hosts')
+    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/VM/create.yml'))
+    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
     extra_vars = {"target_vm": vm_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 

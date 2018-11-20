@@ -1,5 +1,5 @@
 from django.db import models
-import util
+from . import util
 import logging
 
 logger = logging.getLogger(__name__)

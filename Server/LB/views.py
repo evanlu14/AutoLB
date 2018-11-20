@@ -53,7 +53,7 @@ def instance(request):
         print("instance update...")
     if(input["action"] == "delete"):
         print("instance delete...")
-        VM.delete_vm(input["info"]["name"])
+        VM().delete_vm(input["info"]["name"])
 
     status = "successful"
     
