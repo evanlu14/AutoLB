@@ -1,7 +1,7 @@
 # sudo ansible-playbook config.yml -i hosts --extra-vars "s_ip=192.168.162.1"
 # while true; do curl -m1 [IP_ADDRESS]; done
 ---
-- hosts: LBs
+- hosts: VMs
   gather_facts: no
   tasks:
     - name: configure PRE-ROUTING

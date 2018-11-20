@@ -25,8 +25,8 @@
         - ip netns exec {{target}}ns ip link set dev {{target}}int1 up
         - ip netns exec adminns ip link set dev {{target}}int2 up
         - ip netns exec {{target}}ns ip addr add {{ ip_int1 }} dev {{target}}int1
-        - ip netns exec adminns ip addr add {{ ip_int2 }} dev {{target}}int2
+        - ip netns exec adminns ip addr add {{ ip_int2 }}/24 dev {{target}}int2
         - ip netns exec {{target}}ns ip route add default via {{ ip_int2 }}
-        - sudo ip netns exec adminns iptables -t nat -A POSTROUTING -s {{ source }} -o adminint2 -j MASQUERADE
+        - ip netns exec adminns iptables -t nat -A POSTROUTING -s {{ source }} -o adminint2 -j MASQUERADE
       become: yes
       become_method: sudo

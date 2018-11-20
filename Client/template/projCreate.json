@@ -1,8 +1,8 @@
 {
     "action": "create",
     "type": "project",
-    "user": "test",
+    "user": "dtest",
     "info": {
-        "name": "project-name"
+        "name": "dproj"
     }
 }

@@ -1,6 +1,7 @@
 from django.db import models
-from .util import _create_ns, _get_ns_name
+from . import util
 import logging
+from random import randint
 
 logger = logging.getLogger(__name__)
 MAX_NAME_LENGTH = 50
@@ -15,7 +16,6 @@ class Project(models.Model):
             project = Project.objects.get(user=user, name=name)
         except Project.DoesNotExist:
             project = Project(user=user, name=name)
-
             # save to db
             project.save()
 
@@ -24,11 +24,18 @@ class Project(models.Model):
 
         return project
 
-    def delete(self):
-        for subnet in self.subnet_set.all():
+    def delete(self, user, name):
+        try:
+            project = Project.objects.get(user=user, name=name)
+        except Project.DoesNotExist:
+            print("project doesn't exist...")
+            return 
+
+        for subnet in project.subnet_set.all():
             for vm in subnet.vm_set.all():
                 vm.delete()
-        self.delete_ns()
+        Project.objects.filter(user=user, name=name).delete()
+        project.delete_ns()
 
     def info(self):
         res = {
@@ -47,14 +54,22 @@ class Project(models.Model):
 
     def create_ns(self):
         ns_name = self.get_ns_name()
-        _create_ns(ns_name)
+        # generate ns source ip
+        octets = []
+        source = "10."
+        for x in range(2):
+            octets.append(str(randint(0,255)))
+        source = source + '.'.join(octets)
+        source = source + ".0"
+
+        util._create_ns(ns_name, source)
 
     def delete_ns(self):
         ns_name = self.get_ns_name()
-        _remove_ns(ns_name)
+        util._remove_ns(ns_name)
 
     def get_ns_name(self):
-        return _get_ns_name(self.user, self.name, self.pk)
+        return util._get_ns_name(self.user, self.name, self.pk)
 
     @classmethod
     def listall(cls): 

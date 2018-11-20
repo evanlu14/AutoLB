@@ -7,7 +7,7 @@ fileAddress = os.path.abspath(sys.argv[1])
 with open(fileAddress) as f:
     data = json.load(f)
 
-server = "http://localhost:8000"
+server = "http://localhost:4000"
 url = server + "/LB/" + data["type"] + "/"
 headers = {
     'Content-type': 'application/json', 
