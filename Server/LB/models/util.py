@@ -186,7 +186,7 @@ def get_mac(hostname):
         # get all ip addresses 
         ifaces = dom.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0)
         #count = 1
-        for (name, val) in ifaces.iteritems():
+        for (name, val) in ifaces.items():
             #print("%d->" % count)
             #count = count + 1
             if val['hwaddr']:
