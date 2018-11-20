@@ -18,7 +18,7 @@ class Project(models.Model):
             project = Project(user=user, name=name)
             # save to db
             project.save()
-            
+
             # create project ns
             project.create_ns()
 
@@ -34,6 +34,7 @@ class Project(models.Model):
         for subnet in project.subnet_set.all():
             for vm in subnet.vm_set.all():
                 vm.delete()
+        project.delete()
         project.delete_ns()
 
     def info(self):
@@ -55,9 +56,10 @@ class Project(models.Model):
         ns_name = self.get_ns_name()
         # generate ns source ip
         octets = []
-        for x in range(3):
+        source = "10."
+        for x in range(2):
             octets.append(str(randint(0,255)))
-        source = '.'.join(octets)
+        source = source + '.'.join(octets)
         source = source + ".0"
 
         util._create_ns(ns_name, source)
