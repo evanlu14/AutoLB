@@ -2,6 +2,6 @@
     "action": "delete",
     "type": "project",
     "info": {
-        "name": "project-name"
+        "name": "dproj"
     }
 }

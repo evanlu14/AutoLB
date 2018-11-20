@@ -1,8 +1,8 @@
 {
     "action": "create",
     "type": "instance",
-    "user": "project-name",
-    "project": "test",
+    "user": "dtest",
+    "project": "dproj",
     "info": {
         "traffic_type": "http",
         "subnet": "1.1.1.0/24",

@@ -15,15 +15,15 @@ from ansible.executor.playbook_executor import PlaybookExecutor
 # namespace
 def _create_ns(ns_name):
     cur_dir = os.path.abspath('./')
-    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/create.yml')
+    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/create_ns.yml')
     hosts_path = os.path.join(cur_dir, '../ansible/hosts')
 
-    extra_vars = {"target_proj":ns_name, "ip_int1"="1.1.9.2/24", "ip_int2"="1.1.9.1/24", "source"="1.1.9.0/24"}
+    extra_vars = {"target_proj":ns_name, "ip_int1":"1.1.9.2/24", "ip_int2":"1.1.9.1/24", "source":"1.1.9.0/24"}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
 def _remove_ns(ns_name):
     cur_dir = os.path.abspath('./')
-    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/create.yml')
+    playbook_path = os.path.join(cur_dir, '../ansible/Subnet/delete_ns.yml')
     hosts_path = os.path.join(cur_dir, '../ansible/hosts')
     extra_vars = {"target_proj":ns_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
