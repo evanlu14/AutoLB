@@ -41,7 +41,7 @@ def project(request):
 
 @csrf_exempt
 def instance(request):
-    input = json.loads(request.body)
+    input = json.loads(request.body.decode(chardet.detect(request.body)["encoding"]))
 
     if(input["action"] == "create"):
         print("instance create...")
