@@ -20,12 +20,19 @@ hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
 # namespace
 def _create_ns(ns_name, source):
     playbook_path = os.path.join(ansible_path, 'Subnet/create_ns.yml')
-    source_list = list(source)
-    source_list[6] = '2'
-    ip_int1 = "".join(source_list)
-    source_list[6] = '1'
-    ip_int2 = "".join(source_list)
+
+    source_list = source.split('.')
+    source_list[3] = '2'
+    ip_int1 = "".join(source_list) + "/24"
+    source_list[3] = '1'
+    ip_int2 = "".join(source_list) + "/24"
     extra_vars = {"target_proj":ns_name, "ip_int1": ip_int1, "ip_int2": ip_int2, "source": source}
+    
+    print("ns create: ")
+    print("ns: ", ns_name)
+    print("ns: source ", source)
+    print("ns: ip_int1 ", ip_int1)
+    print("ns: ip_int2 ", ip_int2)
 
     _run_playbook(playbook_path, hosts_path, extra_vars)
 

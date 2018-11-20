@@ -28,12 +28,14 @@ def project(request):
         print("project create...")
         project = Project.create(input['user'], input['info']['name'])
         res["info"]["id"] = project.get_id()
+
     if(input["action"] == "info"):
         print("project info...")
     if(input["action"] == "update"):
         print("project update...")
     if(input["action"] == "delete"):
         print("project delete...")
+
     if(input["action"] == "list"):
         res["info"] = Project.listall()
     
@@ -43,21 +45,8 @@ def project(request):
 def instance(request):
     input = json.loads(request.body.decode(chardet.detect(request.body)["encoding"]))
 
-    if(input["action"] == "create"):
-        print("instance create...")
-        # user, proj_name, subnet_ip, traffic_type, backend, healthcheck
-        instance = VM.create(input["user"], input["project"], input["info"]["subnet"], input["info"]["traffic_type"], input["info"]["backend"]["entities"], input["info"]["backend"]["health-check"])
-    if(input["action"] == "info"):
-        print("instance info...")
-    if(input["action"] == "update"):
-        print("instance update...")
-    if(input["action"] == "delete"):
-        print("instance delete...")
-        VM().delete(input["info"]["name"])
-
     status = "successful"
     
-
     action = input["action"]
     type = input["type"]
     res = {
@@ -68,5 +57,21 @@ def instance(request):
             "id": 1,
         }
     }
+
+    if(input["action"] == "create"):
+        print("instance create...")
+        # user, proj_name, subnet_ip, traffic_type, backend, healthcheck
+        instance = VM.create(input["user"], input["project"], input["info"]["subnet"], input["info"]["traffic_type"], input["info"]["backend"]["entities"], input["info"]["backend"]["health-check"])
+
+    if(input["action"] == "info"):
+        print("instance info...")
+    if(input["action"] == "update"):
+        print("instance update...")
+        
+    if(input["action"] == "delete"):
+        print("instance delete...")
+        VM().delete(input["info"]["name"])
+
+    
     return HttpResponse(json.dumps(res))
 

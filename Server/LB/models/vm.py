@@ -31,15 +31,17 @@ class VM(models.Model):
         id = project.get_id()
         if isinstance(id, int):
             id = str(id)
-        vm.create_vm(user, proj_name, id)
-        vm.attach_to_ns()
+
+        name = util._get_vm_name(user, proj_name, id)
+        vm.create_vm(name)
+        vm.attach_to_ns(name)
         vm.config_lb()
 
         return vm
 
-    def delete(self, vm_name):
-        self.delete_vm(vm_name)
-        self.detach_to_ns()
+    def delete(self, name):
+        self.delete_vm(name)
+        self.detach_to_ns(name)
 
     def info(self):
         res = {
@@ -50,17 +52,23 @@ class VM(models.Model):
         }
         return res
 
-    def create_vm(self, user, proj_name, id):
+    def create_vm(self, name):
         """ just create
         """
-        name = util._get_vm_name(user, proj_name, id)
         util._create_vm(name)
 
-    def attach_to_ns(self):
+    def attach_to_ns(self, name):
         """ create L2, attach vm to L2 and L2 to ns
         """
+        net_name = name + 'net'
+        br_name = name + 'br'
+        template_net = net_name + '.xml'
+        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'Subnet/create_net.yml'))
+        extra_vars = {"net_name":net_name, "br_name": br_name, "template_net":template_net}
+        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
+
         playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/attach.yml'))
-        extra_vars = {"vm":"vm_test", "bridge_name":"br_test", "target":"proj0", "ip_int3":"1.1.4.1/24" }
+        extra_vars = {"vm":name, "bridge_name":br_name, "target":name, "ip_int3":"1.1.4.1/24" }
         util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
     def config_lb(self):
@@ -70,11 +78,11 @@ class VM(models.Model):
         extra_vars = {"s_ip":"192.168.162.1"}
         util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
-    def detach_to_ns(self):
+    def detach_to_ns(self, name):
         """ detach vm to L2, l2 to ns, delete l2
         """
         playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/dettach.yml'))
-        extra_vars = {"target":"proj0", "vm":"vm_test", "mac_addr": "xxx"}
+        extra_vars = {"target":name, "vm":name, "mac_addr": "xxx"}
         util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
     def delete_vm(self, vm_name):

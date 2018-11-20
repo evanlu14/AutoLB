@@ -1,6 +1,7 @@
 from django.db import models
 from . import util
 import logging
+from random import randint
 
 logger = logging.getLogger(__name__)
 MAX_NAME_LENGTH = 50
@@ -47,13 +48,17 @@ class Project(models.Model):
 
     def create_ns(self):
         ns_name = self.get_ns_name()
-        # subnet_ip
-        source = "1.1.9.0/24"
+        # generate ns source ip
+        octets = []
+        for x in range(3):
+            octets.append(str(randint(0,255)))
+        source = '.'.join(octets)
+        source = source + ".0"
+
         util._create_ns(ns_name, source)
 
     def delete_ns(self):
         ns_name = self.get_ns_name()
-
         util._remove_ns(ns_name)
 
     def get_ns_name(self):
