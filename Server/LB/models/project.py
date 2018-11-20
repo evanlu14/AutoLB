@@ -47,10 +47,13 @@ class Project(models.Model):
 
     def create_ns(self):
         ns_name = self.get_ns_name()
-        util._create_ns(ns_name)
+        # subnet_ip
+        source = "1.1.9.0/24"
+        util._create_ns(ns_name, source)
 
     def delete_ns(self):
         ns_name = self.get_ns_name()
+
         util._remove_ns(ns_name)
 
     def get_ns_name(self):

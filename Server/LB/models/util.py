@@ -11,18 +11,20 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.inventory.manager import InventoryManager
 from ansible.executor.playbook_executor import PlaybookExecutor
+import hashlib
 
 cur_dir = os.path.abspath('./')
-ansible_path = os.path.normpath(os.path.join(cur_dir, 'Server/LB/ansible/'))
+ansible_path = os.path.normpath(os.path.join(cur_dir, 'LB/ansible/'))
 hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
 
 # namespace
-def _create_ns(ns_name):
+def _create_ns(ns_name, source):
     playbook_path = os.path.join(ansible_path, 'Subnet/create_ns.yml')
-    
-    source = "1.1.9.0/24"
-    ip_int1 = "1.1.9.2/24"
-    ip_int2 = "1.1.9.1/24"
+    source_list = list(source)
+    source_list[6] = '2'
+    ip_int1 = "".join(source_list)
+    source_list[6] = '1'
+    ip_int2 = "".join(source_list)
     extra_vars = {"target_proj":ns_name, "ip_int1": ip_int1, "ip_int2": ip_int2, "source": source}
 
     _run_playbook(playbook_path, hosts_path, extra_vars)
@@ -35,7 +37,7 @@ def _remove_ns(ns_name):
 def _get_ns_name(user, proj_name, id):
     if isinstance(id, int):
         id = str(id)
-    return user + "_" + proj_name + "_" + id
+    return hashlib.sha224((user + proj_name + id).encode('ascii')).hexdigest()[:5]
 
 # vm
 def _create_vm(vm_name):

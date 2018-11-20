@@ -28,8 +28,10 @@ class VM(models.Model):
         vm = VM(subnet=subnet, traffic=traffic_type, backends=backend, healthcheck=healthcheck)
 
         vm.save()
-
-        vm.create_vm(user, proj_name, project)
+        id = project.get_id()
+        if isinstance(id, int):
+            id = str(id)
+        vm.create_vm(user, proj_name, id)
         vm.attach_to_ns()
         vm.config_lb()
 
@@ -57,17 +59,23 @@ class VM(models.Model):
     def attach_to_ns(self):
         """ create L2, attach vm to L2 and L2 to ns
         """
-        pass
+        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/attach.yml'))
+        extra_vars = {"vm":"vm_test", "bridge_name":"br_test", "target":"proj0", "ip_int3":"1.1.4.1/24" }
+        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
     def config_lb(self):
         """ config lb on vm
         """
-        pass
+        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'LB/config.yml'))
+        extra_vars = {"s_ip":"192.168.162.1"}
+        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
     def detach_to_ns(self):
         """ detach vm to L2, l2 to ns, delete l2
         """
-        pass
+        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/dettach.yml'))
+        extra_vars = {"target":"proj0", "vm":"vm_test", "mac_addr": "xxx"}
+        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
     def delete_vm(self, vm_name):
         """ delete the vm
