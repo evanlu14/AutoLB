@@ -145,7 +145,7 @@ def get_ip(hostname):
                             target_ip.append(ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
 
     conn.close()
-    if(target_ip == [])
+    if not target_ip:
         return ""
     return target_ip[0]
 
@@ -195,6 +195,6 @@ def get_mac(hostname):
                     target_mac_addr.remove(val['hwaddr'])
 
     conn.close()
-    if(target_mac_addr == [])
+    if not target_mac_addr:
         return ""
     return target_mac_addr[0]
