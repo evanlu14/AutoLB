@@ -12,11 +12,13 @@ from ansible.vars.manager import VariableManager
 from ansible.inventory.manager import InventoryManager
 from ansible.executor.playbook_executor import PlaybookExecutor
 
+cur_dir = os.path.abspath('./')
+ansible_path = os.path.normpath(os.path.join(cur_dir, 'Server/LB/ansible/'))
+hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
+
 # namespace
 def _create_ns(ns_name):
-    cur_dir = os.path.abspath('./')
-    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/Subnet/create_ns.yml'))
-    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
+    playbook_path = os.path.join(ansible_path, 'Subnet/create_ns.yml')
     
     source = "1.1.9.0/24"
     ip_int1 = "1.1.9.2/24"
@@ -26,9 +28,7 @@ def _create_ns(ns_name):
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
 def _remove_ns(ns_name):
-    cur_dir = os.path.abspath('./')
-    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/Subnet/delete_ns.yml'))
-    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
+    playbook_path = os.path.join(ansible_path, 'Subnet/delete_ns.yml')
     extra_vars = {"target_proj":ns_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
@@ -39,9 +39,7 @@ def _get_ns_name(user, proj_name, id):
 
 # vm
 def _create_vm(vm_name):
-    cur_dir = os.path.abspath('./')
-    playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/VM/create.yml'))
-    hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
+    playbook_path = os.path.join(ansible_path, 'VM/create.yml')
     extra_vars = {"target_vm": vm_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
@@ -77,8 +75,6 @@ def tail(f, n):
 
 # ansible
 def _run_playbook(playbook_path, hosts_path, extra_vars):
-    # playbook_path = '/home/anran/ansible/VM/create.yml'
-    # extra_vars = {'target_vm': 'py_test'}
     loader = DataLoader()
 
     inventory = InventoryManager(loader=loader, sources='/home/anran/hosts')

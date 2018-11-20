@@ -72,11 +72,6 @@ class VM(models.Model):
     def delete_vm(self, vm_name):
         """ delete the vm
         """
-        cur_dir = os.path.abspath('./')
-        playbook_path = os.path.normpath(os.path.join(cur_dir, '../ansible/VM/delete.yml'))
-        hosts_path = os.path.normpath(os.path.join(cur_dir, '../ansible/hosts'))
+        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/delete.yml'))
         extra_vars = {"target_vm": vm_name}
-        print(playbook_path) 
-        print(hosts_path)
-        print(extra_vars)
-        util._run_playbook(playbook_path, hosts_path, extra_vars)
+        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
