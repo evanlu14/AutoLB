@@ -4,6 +4,15 @@
 - hosts: VMs
   gather_facts: no
   tasks:
+    - name: ip forward
+      command: "{{ item }}"
+      with_items: 
+        - sysctl -w net.ipv4.ip_forward=1
+        - iptables -D FORWARD 8
+        - iptables -D FORWARD 8
+      become: yes
+      become_method: sudo 
+
     - name: configure PRE-ROUTING
       command: "{{ item }}"
       with_items: 
