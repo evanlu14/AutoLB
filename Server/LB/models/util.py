@@ -89,7 +89,7 @@ def tail(f, n):
 def _run_playbook(playbook_path, hosts_path, extra_vars):
     loader = DataLoader()
 
-    inventory = InventoryManager(loader=loader, sources='/home/anran/hosts')
+    inventory = InventoryManager(loader=loader, sources=hosts_path)
     variable_manager = VariableManager(loader=loader, inventory=inventory)
     
     if not os.path.exists(playbook_path):
@@ -145,6 +145,8 @@ def get_ip(hostname):
                             target_ip.append(ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
 
     conn.close()
+    if(target_ip == [])
+        return ""
     return target_ip[0]
 
 def get_mac(hostname):
@@ -193,4 +195,6 @@ def get_mac(hostname):
                     target_mac_addr.remove(val['hwaddr'])
 
     conn.close()
+    if(target_mac_addr == [])
+        return ""
     return target_mac_addr[0]
