@@ -25,7 +25,8 @@ def _create_ns(ns_name, source):
     source_list[3] = '2'
     ip_int1 = ".".join(source_list) + "/24"
     source_list[3] = '1'
-    ip_int2 = ".".join(source_list) + "/24"
+    # ip_int2 should not have /24
+    ip_int2 = ".".join(source_list)
     source = source + "/24"
     extra_vars = {"target_proj":ns_name, "ip_int1": ip_int1, "ip_int2": ip_int2, "source": source}
 

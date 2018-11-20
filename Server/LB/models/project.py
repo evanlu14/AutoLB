@@ -34,7 +34,7 @@ class Project(models.Model):
         for subnet in project.subnet_set.all():
             for vm in subnet.vm_set.all():
                 vm.delete()
-        project.delete()
+        Project.objects.filter(user=user, name=name).delete()
         project.delete_ns()
 
     def info(self):
