@@ -2,7 +2,6 @@
 from os import listdir
 from os.path import isfile, join
 import subprocess
-from __future__ import print_function
 import libvirt
 from xml.dom import minidom
 import os
@@ -18,7 +17,6 @@ import hashlib
 cur_dir = os.path.abspath('./')
 ansible_path = os.path.normpath(os.path.join(cur_dir, 'LB/ansible/'))
 hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
-mac_addr = ""
 
 # namespace
 def _create_ns(ns_name, source):
@@ -112,8 +110,47 @@ def _run_playbook(playbook_path, hosts_path, extra_vars):
 def get_ip(hostname):
     input_name = hostname
 
-    target_mac_addr = []
     target_ip = []
+
+    # Connect to the local hypervisor and get all active domains' ID.
+    conn = libvirt.open('qemu:///system')
+    if conn == None:
+        print('Failed to open connection to qemu:///system', file=sys.stderr)
+        exit(1)
+    domainIDs = conn.listDomainsID()
+    if domainIDs == None:
+        print('Failed to get a list of domain IDs', file=sys.stderr)
+    if len(domainIDs) == 0:
+        print('No active domains...')
+
+    # For each ID, finding the corresponding MAC address and IP address.
+    for domainID in domainIDs:
+        dom = conn.lookupByID(domainID)
+        if dom == None:
+            print('Failed to get the domain object', file=sys.stderr)
+        # get domain name
+        curName = dom.name()
+        print("=========VM %s =========" % (curName))
+        # get all ip addresses 
+        ifaces = dom.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0)
+        #count = 1
+        for (name, val) in ifaces.iteritems():
+            #print("%d->" % count)
+            #count = count + 1
+            if val['addrs']:
+                for ipaddr in val['addrs']:
+                    if ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV4:
+                        print("IPV4: " + ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
+                        if curName == input_name:
+                            target_ip.append(ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
+
+    conn.close()
+    return target_ip[0]
+
+def get_mac(hostname):
+    input_name = hostname
+
+    target_mac_addr = []
 
     # Connect to the local hypervisor and get all active domains' ID.
     conn = libvirt.open('qemu:///system')
@@ -154,14 +191,6 @@ def get_ip(hostname):
                 print("MAC: %s" % (val['hwaddr']))
                 if curName == input_name:
                     target_mac_addr.remove(val['hwaddr'])
-            if val['addrs']:
-                for ipaddr in val['addrs']:
-                    if ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV4:
-                        print("IPV4: " + ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
-                        if curName == input_name:
-                            target_ip.append(ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
 
     conn.close()
-    return (target_mac_addr[0], target_ip[0])
-
-
+    return target_mac_addr[0]

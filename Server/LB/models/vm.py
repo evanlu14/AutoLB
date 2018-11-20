@@ -41,7 +41,7 @@ class VM(models.Model):
         ip_addr = ""
         while not ip_addr:
             time.sleep(10)
-            util.mac_addr,ip_addr = util.get_ip(name)
+            ip_addr = util.get_ip(name)
 
         # rewrite hosts file
         with open(util.hosts_path, 'w') as f:
@@ -111,7 +111,7 @@ class VM(models.Model):
         """ detach vm to L2, l2 to ns, delete l2
         """
         playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/dettach.yml'))
-        mac_addr = util.mac_addr
+        mac_addr = util.get_mac(name)
         extra_vars = {"target":name, "vm":name, "mac_addr": mac_addr}
         util._run_playbook(playbook_path, util.hosts_path, extra_vars)
 
