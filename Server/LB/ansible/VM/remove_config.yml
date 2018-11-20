@@ -1,4 +1,4 @@
-# sudo ansible-playbook config.yml -i hosts --extra-vars "ip1=1.1.4.2/24 ip2=1.1.4.1"
+# sudo ansible-playbook config.yml -i hosts --extra-vars "ip1=1.1.4.2/24"
 ---
 - hosts: VMs
   gather_facts: no

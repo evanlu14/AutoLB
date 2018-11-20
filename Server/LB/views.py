@@ -14,7 +14,7 @@ import chardet
 def project(request):
     input = json.loads(request.body.decode(chardet.detect(request.body)["encoding"]))
 
-    status = "successful"
+    status = "failure"
     action = input["action"]
     type = input["type"]
     res = {
@@ -27,18 +27,27 @@ def project(request):
     if(input["action"] == "create"):
         print("project create...")
         project = Project.create(input['user'], input['info']['name'])
+        status = "successful"
         res["info"]["id"] = project.get_id()
 
     if(input["action"] == "info"):
         print("project info...")
+        status = "successful"
+
     if(input["action"] == "update"):
         print("project update...")
+        status = "successful"
+
     if(input["action"] == "delete"):
         print("project delete...")
         Project().delete(input['user'], input['info']['name'])
+        status = "successful"
+
 
     if(input["action"] == "list"):
         res["info"] = Project.listall()
+        status = "successful"
+
     
     return HttpResponse(json.dumps(res))
 

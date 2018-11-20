@@ -2,7 +2,9 @@
 from os import listdir
 from os.path import isfile, join
 import subprocess
-
+from __future__ import print_function
+import libvirt
+from xml.dom import minidom
 import os
 import sys
 from collections import namedtuple
@@ -16,6 +18,7 @@ import hashlib
 cur_dir = os.path.abspath('./')
 ansible_path = os.path.normpath(os.path.join(cur_dir, 'LB/ansible/'))
 hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
+mac_addr = ""
 
 # namespace
 def _create_ns(ns_name, source):
@@ -107,12 +110,12 @@ def _run_playbook(playbook_path, hosts_path, extra_vars):
     results = pbex.run()
 
 def get_ip(hostname):
-    """ get the ip of vm
-        ensure vm only have one IP first
-        return: ip address
-    """
-    ret = ""
+    input_name = hostname
 
+    target_mac_addr = []
+    target_ip = []
+
+    # Connect to the local hypervisor and get all active domains' ID.
     conn = libvirt.open('qemu:///system')
     if conn == None:
         print('Failed to open connection to qemu:///system', file=sys.stderr)
@@ -130,16 +133,35 @@ def get_ip(hostname):
             print('Failed to get the domain object', file=sys.stderr)
         # get domain name
         curName = dom.name()
-        if curName == hostname:
-            # get all ip addresses 
-            ifaces = dom.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0)
-            for (name, val) in ifaces.iteritems():
-                if val['addrs']:
-                    for ipaddr in val['addrs']:
-                        if ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV4:
-                            ret = ipaddr['addr'] 
-                            # print("IPV4: " + ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
-                        # elif ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV6:
-                        #     print("IPV6: " + ipaddr['addr'])
+        print("=========VM %s =========" % (curName))
+
+        # get all mac addresses
+        vm_xml = minidom.parseString(dom.XMLDesc(0))
+        macs = vm_xml.getElementsByTagName('mac')
+        for i in macs:
+            val = i.attributes['address'].value
+            print("MAC: " + val)
+            if curName == input_name:
+                target_mac_addr.append(val)
+
+        # get all ip addresses 
+        ifaces = dom.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0)
+        #count = 1
+        for (name, val) in ifaces.iteritems():
+            #print("%d->" % count)
+            #count = count + 1
+            if val['hwaddr']:
+                print("MAC: %s" % (val['hwaddr']))
+                if curName == input_name:
+                    target_mac_addr.remove(val['hwaddr'])
+            if val['addrs']:
+                for ipaddr in val['addrs']:
+                    if ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV4:
+                        print("IPV4: " + ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
+                        if curName == input_name:
+                            target_ip.append(ipaddr['addr'] + "/" +str(ipaddr["prefix"]))
+
     conn.close()
-    return ret
+    return (target_mac_addr[0], target_ip[0])
+
+
