@@ -1,0 +1,5 @@
+[VMs]
+192.168.162.244 ansible_connection=ssh ansible_ssh_user=zecao ansible_ssh_pass=123 ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_sudo_pass='123'
+
+[LBs]
+192.168.162.244 ansible_connection=ssh ansible_ssh_user=zecao ansible_ssh_pass=123 ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_sudo_pass='123'

@@ -45,13 +45,15 @@ def instance(request):
 
     if(input["action"] == "create"):
         print("instance create...")
-        instance = VM.create()
+        # user, proj_name, subnet_ip, traffic_type, backend, healthcheck
+        instance = VM.create(input["user"], input["project"], input["info"]["subnet"], input["info"]["traffic_type"], input["info"]["backend"]["entities"], input["info"]["backend"]["health-check"])
     if(input["action"] == "info"):
         print("instance info...")
     if(input["action"] == "update"):
         print("instance update...")
     if(input["action"] == "delete"):
         print("instance delete...")
+        VM.delete_vm(input["info"]["name"])
 
     status = "successful"
     

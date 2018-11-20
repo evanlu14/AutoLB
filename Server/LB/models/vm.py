@@ -28,7 +28,7 @@ class VM(models.Model):
 
         vm.save()
 
-        vm.create_vm()
+        vm.create_vm(user, proj_name, project)
         vm.attach_to_ns()
         vm.config_lb()
 
@@ -43,14 +43,15 @@ class VM(models.Model):
                 "subnet": subnet,
                 "traffic": traffic,
                 "backends": backends,
-                "healthcheck", healthcheck
+                "healthcheck": healthcheck
         }
         return res
 
-    def create_vm(self):
+    def create_vm(self, user, proj_name, id):
         """ just create
         """
-        pass
+        name = _get_vm_name(user, proj_name, id)
+        _create_vm(name)
 
     def attach_to_ns(self):
         """ create L2, attach vm to L2 and L2 to ns
@@ -67,7 +68,11 @@ class VM(models.Model):
         """
         pass
 
-    def delete_vm(self):
+    def delete_vm(self, vm_name):
         """ delete the vm
         """
-        pass
+        cur_dir = os.path.abspath('./')
+        playbook_path = os.path.join(cur_dir, '../ansible/VM/delete.yml')
+        hosts_path = os.path.join(cur_dir, '../ansible/hosts')
+        extra_vars = {"target_vm": vm_name}
+        _run_playbook(playbook_path, hosts_path, extra_vars)
