@@ -1,5 +1,5 @@
 
-# CSC792 Linux Networking
+# CSC792 Linux Networking milestone 2
 
 Anran Zhou(azhou6@ncsu.edu) && Zecao Lu(zlu24@ncsu.edu)
 
