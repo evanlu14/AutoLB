@@ -14,14 +14,19 @@ from ansible.inventory.manager import InventoryManager
 from ansible.executor.playbook_executor import PlaybookExecutor
 import hashlib
 
+from random import randint
+import logging
+logger = logging.getLogger(__name__)
+
 cur_dir = os.path.abspath('./')
 ansible_path = os.path.normpath(os.path.join(cur_dir, 'LB/ansible/'))
 hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
 
 # namespace
 def _create_ns(ns_name, source):
-    playbook_path = os.path.join(ansible_path, 'Subnet/create_ns.yml')
+    playbook_path = os.path.join(ansible_path, 'Project/create_ns.yml')
 
+    source = source.split("/")[0]
     source_list = source.split('.')
     source_list[3] = '2'
     ip_int1 = ".".join(source_list) + "/24"
@@ -31,23 +36,25 @@ def _create_ns(ns_name, source):
     source = source + "/24"
     extra_vars = {"target_proj":ns_name, "ip_int1": ip_int1, "ip_int2": ip_int2, "source": source}
 
-    print("ns create: ")
-    print("ns: ", ns_name)
-    print("ns: source ", source)
-    print("ns: ip_int1 ", ip_int1)
-    print("ns: ip_int2 ", ip_int2)
+    # print("ns create: ")
+    # print("ns: ", ns_name)
+    # print("ns: source ", source)
+    # print("ns: ip_int1 ", ip_int1)
+    # print("ns: ip_int2 ", ip_int2)
+    logger.info("ns_create: {}, ip: {}, int1: {}, int2: {}".format(ns_name, source, ip_int1, ip_int2))
 
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
-def _remove_ns(ns_name):
-    playbook_path = os.path.join(ansible_path, 'Subnet/delete_ns.yml')
-    extra_vars = {"target_proj":ns_name}
+def _remove_ns(ns_name, ip):
+    playbook_path = os.path.join(ansible_path, 'Project/delete_ns.yml')
+    extra_vars = {"target_proj":ns_name, "ip":ip}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
 def _get_ns_name(user, proj_name, id):
     if isinstance(id, int):
         id = str(id)
-    return hashlib.sha224((user + proj_name + id).encode('ascii')).hexdigest()[:5]
+    # return hashlib.sha224((user + proj_name + id).encode('ascii')).hexdigest()[:5]
+    return user[:3] + proj_name[:3] + id
 
 # vm
 def _create_vm(vm_name):
@@ -198,3 +205,12 @@ def get_mac(hostname):
     if not target_mac_addr:
         return ""
     return target_mac_addr[0]
+
+def _generate_ip():
+    octets = []
+    source = "102."
+    for x in range(2):
+        octets.append(str(randint(0,255)))
+    source = source + '.'.join(octets)
+    source = source + ".0/24"
+    return source

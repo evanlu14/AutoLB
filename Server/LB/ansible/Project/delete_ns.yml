@@ -1,0 +1,22 @@
+# ansible-playbook delete_ns.yml --extra-vars "target_proj=proj0 ip=102.1.1.1/24"
+# validate by sudo ip netns list
+---
+- hosts: localhost
+  gather_facts: no
+  vars: 
+    target: "{{ target_proj }}"
+  tasks:
+    - name: delete project namespace veth pair
+      command: "{{ item }}"
+      with_items: 
+        - ip netns exec {{ target }} ip link set dev {{target}}int1 down
+        - ip netns exec adminns ip link set dev {{target}}int2 down
+        - ip netns exec {{ target }} ip link delete {{target}}int1
+        - ip netns exec adminns iptables -t nat -D POSTROUTING -s {{ ip }} -o adminnsint2 -j MASQUERADE
+      become: yes
+      become_method: sudo
+
+    - name: Delete project namespace
+      command: ip netns del "{{ target }}"
+      become: yes
+      become_method: sudo

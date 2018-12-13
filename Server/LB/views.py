@@ -6,7 +6,6 @@ import json
 from .models.project import Project
 from .models.subnet import Subnet
 from .models.vm import VM
-from .models.controller import Controller
 import chardet
 
 # Create your views here.

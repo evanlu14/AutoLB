@@ -10,9 +10,17 @@ A load balance as a service scheme.
 python3, django, ansible, libvirt, docker.
 
 ```
+# libvirt
+sudo apt install qemu-kvm libvirt-bin virt-manager virt-viewer virtinst
+sudo apt install libvirt-python libvirt-dev
+pip3 install libvirt-python
+
+# ansible
+sudo apt-get install ansible libssl-dev
+pip3 install ansible
+
+# django
 sudo pip3 install Django
-sudo pip3 install ansible 
-sudo apt-get install ansible
 ```
 
 ### Installing

@@ -79,3 +79,18 @@ ping 8.8.8.8
 
 # docker
 sudo docker network create --driver bridge --internal --subnet 172.28.100.0/24 --gateway 172.28.100.1 testbr1
+
+# add adminns
+  812  sudo ip netns add adminns
+  813  sudo ip add adminnsint1 type veth peer name adminnsint2
+  814  sudo ip link add adminnsint1 type veth peer name adminnsint2
+  815  sudo ip link set adminnsint2 netns adminns
+  816  sudo ip link exec adminns ip link set dev adminnsint2 up
+  817  sudo ip netns exec adminns ip link set dev adminnsint2 up
+  818  sudo ip addr add 102.1.1.1/24 dev adminnsint1
+  819  sudo ip link set dev adminnsint1 up
+  820  sudo ip netns exec adminns ip addr 102.1.1.2/24 dev adminnsint2
+  821  sudo ip netns exec adminns ip addr add 102.1.1.2/24 dev adminnsint2
+  822  sudo ip netns exec adminns ip route add default via 102.1.1.1
+  824  sudo iptables -t nat -A POSTROUTING  -s 102.1.1.0/24   -o enp0s3 -j MASQUERADE
+  825  sudo ip netns exec adminns ping 8.8.8.8
