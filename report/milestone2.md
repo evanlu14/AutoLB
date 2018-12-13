@@ -1,9 +1,9 @@
 
-# CSC792 Linux Networking
+# CSC792 Linux Networking milestone 2
 
 Anran Zhou(azhou6@ncsu.edu) && Zecao Lu(zlu24@ncsu.edu)
 
-## 1. Introduction
+## 1) Project Description
 
 We choose the load balancing as a service as our project topic.
 
@@ -13,13 +13,13 @@ At a high level, load balancing is typically accomplished by having a load balan
 
 Load balancers were implemented by hardware devices in the past. With the advent of the cloud, we can see virtual load balancers are used to provide services to a pool of virtual servers. The function of virtual load balancers and physical load balancers are the same. But there are two major benefits of using virtual load balancers. The first is allowing users to provision load balancers on demand and in the case of metered clouds. The second is allowing users to pay for load balancing services on a utility basis.
 
-In this project, we plan to make containers on the same or different Linux physical machines act as virtual load balancers to distribute loads on multiple target servers. These load balancers are container migrated and can be configured automatically.
+In this project, we plan to make VMs on the same or different Linux physical machines act as virtual load balancers to distribute loads on multiple target servers. These load balancers are VM migrated and can be configured automatically.
 
-## 2. Related Work
+## 2) Related Work
 
 We investigated two popular products in the market. One is AWS Elastic Load Balancing. The other is Google Cloud Load Balancing.
 
-### 2.1 AWS Elastic Load Balancing
+### 2a) AWS Elastic Load Balancing
 
 There are three types of Load balancers provided by AWS which are **Application Load Balancer**, **Network Load Balancer** and **Classic Load Balancer**.
 
@@ -36,7 +36,7 @@ So the customers can select the appropriate load balancers based on their applic
 
   
 
-### 2.2 Google Cloud Load Balancing
+### 2b) Google Cloud Load Balancing
 
 Google Cloud Load Balancing provides 5 different load balancers. We can divide those five load balancers by three aspects: Area(Global/Regional), Scope(External/Internal) and Traffic Type. The following table provides some specifics about each load balancer:
 
@@ -62,7 +62,9 @@ The features of google load balancers are summarized as below:
 
 * Cloud CDN Integration improves the performance.
 
-### 2.3 Comparison
+  
+
+### 2c) Comparison
 
 AWS load balancers and Google Cloud Load Balancer both provide the feature of high availability, automatic scaling, internal load balancing, global load balancing and robust security, etc. But there are still some differences listed in the table below.
 
@@ -73,146 +75,16 @@ AWS load balancers and Google Cloud Load Balancer both provide the feature of hi
 |supported protocols|HTTP(s), TCP, SSL|HTTP(S), TCP/SSL, UDP and proxy| Google support more protocols when applying LB |
 |CDN|no use| Google cloud CDN| Google combined CDN with LB to improve performance.
 
-## 3. Project Description
-
-### 3.1 Detailed project goal
-
-### 3.2 Proposed feature - functional and management
-
-#### 3.2.1 Functional Feature
-There are mainly two features of our LBaaS. 
--  HTTP load balancing
--  Health checker
-
-When a user create a new project, there are the following steps:
-1.  Controller create a VM and get an IP
-2.  Configure LB functions on that VM
-3.  Health checker machine register that new VM
-4.  Register VM ip on DNS and get the URL
-5.  If this is a new project, Create a new namespace(subnet).
-6.  Return the URL to users
-
-We can realize health checker using collectd framework and we plan to design data structures to store the monitor logs.
-
-#### 3.2.2 Management Feature
--  Performance & Scalability (remove)
-
-In order to ensure the performance of our load balancers, we should introduce the scale concept. We have some ansible and shell scripts to help administers to scale the load balancers.
-
-- Availability & Reliability
-
-In order to ensure the availability and reliability of our load balancer services, we set the health checker to monitor the actual servers' system status and the load balancers' status. 
-
-We have a workflow to deal with the crash of a load balancer in a project's subnet:
-1.  Health checker found it
-2.  Create a new VM and configure LB functions on it.
-3.  Renew the DNS information
-4.  If the older one still can't work for a threshold time period. Delete that one directly.
-5.  If the older one get healthy again, recycle the new allocated LB.
-
-### 3.3. Environmental constraints
-
-### 3.4. High-level deployment topology and description
-
-Our project architecture is shown as the figure below:
+## 3) Feature Implementation
+The architecture is like the graph below:
 
 ![](./architecture.png)
 
-So basically it contains three parts:
+### 3a) Functional Feature
+There are mainly four features of our LBaaS. 
+-  HTTP level load balancing
+-  Health checker
 
-1. Hypervisor. In hypervisor there are 
-	- Server(controller).
-3. Load balancer network.
-	- administrator network namespace. 
-	- project network namespace.
-	- load balancer unit.
-1. Client side.
-	- network namespace and client docker
-
-## 4. Implementation architecture 
-Implementation detail (Northbound, southbound, and logic layer(for each function). Add information for two views: user guide and developer guide to your solution.
-
-## 5. Evaluation section
-
-## 6. Summary and future scope
-
-#### 3. User Interface & Configurability
-We provide two methods for users to do the configuration and control their VPCs. One is CLI written in Python, the other one is the web app.
-
-* CLI interfaces
-This interface is realized by calling a python script. Users can define the JSON formatted configuration files and then send them to the controller. Then the returned value are displayed on the terminal.
-
-* Web APP interfaces
-This interface is realized by a plugin module of Django. Users can access our webpages and input the configurations on the webpage and then send it to the controller. The returned value will be shown on the webpage.
-
-Here are some templates of user's input:
-```json
-{
-    "action": ["create"/"info"/"update"/"delete"],
-    "type": ["project"/"instance"],
-    "info": {
-        "name": "example"
-    }
-}
-```
-The template of returned value:
-```json
-{
-    "status": ["successful"/"fail"],
-    "action": "create",
-    "type": "project",
-    "info": {
-        "name": "example",
-        "id": 1,
-    }
-}
-```
-For project, instance and subnets, we have more specific configurations:
-* Project
-	```json
-	{
-	    "type": "project",
-	    "user": "john",
-	    "name": "john's project",
-	    "instances": [],
-	}
-	```
-
-* Instance
-	```json
-	{
-	    "type": "instance",
-	    "traffic_type": ["tcp"/"http"],
-	    "subnet": "1.1.1.0/24",
-	    "backend": {
-	        "entities": [
-	            ["ip"/"url"], ...
-	        ],
-	        "health-check": {},
-	        "auto-scaling": true,
-	    }
-	}
-	```
-
-* health check
-	check the status of backend servers:
-	```json
-	{
-	    "protocol": ["HTTP"/"TCP"],
-	    "port": 80,
-	    "request-path": "/",
-	    "criteria": {
-	        "interval": 5,
-	        "timeout": 5,
-	        "health-threshold": 2,
-	        "unhealth-threshold": 2
-	    }
-	}
-	```
-
-## appendix
-
-### Model
 The Interfaces of key components in this architecture are listed below using Python:
 * Controller
 	```Python
@@ -324,3 +196,138 @@ The Interfaces of key components in this architecture are listed below using Pyt
 	        """ attack to subnet
 			"""
 	```
+
+When a user create a new project, there are the following steps:
+1.  Controller create a VM and get an IP
+2.  Configure LB functions on that VM
+3.  Health checker machine register that new VM
+4.  Register VM ip on DNS and get the URL
+5.  If this is a new project, Create a new namespace(subnet).
+6.  Return the URL to users
+
+We can realize health checker using collectd framework and we plan to design data structures to store the monitor logs.
+
+### 3b) management feature
+
+#### Availability & Reliability
+To make sure the health status of our instances, we deployed the health checker function in our controller. Basically it receive the user-defined parameters of interval, timeout and retries. For virtual machine, we used collectd framework to collect the real-time status of each virtual machine. And for docker container, we implemented this function based on docker inspect command. 
+
+The logic for two secereny are the same. The health check will first run interval seconds and then again interval seconds after each previous check completes. If a single run of the check takes longer than timeout seconds then the check is considered to have failed. It takes retries consecutive failures of the health check for the container to be considered unhealthy.
+
+#### 3. User Interface & Configurability
+We provide two methods for users to do the configuration and control their VPCs. One is CLI written in Python, the other one is the web app.
+
+* CLI interfaces
+This interface is realized by calling a python script. Users can define the JSON formatted configuration files and then send them to the controller. Then the returned value are displayed on the terminal.
+
+Here are some templates of user's input:
+```json
+{
+    "action": ["create"/"info"/"update"/"delete"],
+    "type": ["project"/"instance"],
+    "info": {
+        "name": "example"
+    }
+}
+```
+The template of returned value:
+```json
+{
+    "status": ["successful"/"fail"],
+    "action": "create",
+    "type": "project",
+    "info": {
+        "name": "example",
+        "id": 1,
+    }
+}
+```
+For project, instance and subnets, we have more specific configurations:
+* Project
+	```json
+	{
+	    "type": "project",
+	    "user": "john",
+	    "name": "john's project",
+	    "instances": [],
+	}
+	```
+
+* Instance
+	```json
+	{
+	    "type": "instance",
+	    "traffic_type": ["tcp"/"http"],
+	    "subnet": "1.1.1.0/24",
+	    "backend": {
+	        "entities": [
+	            ["ip"/"url"], ...
+	        ],
+	        "health-check": {},
+	        "auto-scaling": true,
+	    }
+	}
+	```
+
+* health check
+	check the status of backend servers:
+	```json
+	{
+	    "protocol": ["HTTP"/"TCP"],
+	    "port": 80,
+	    "request-path": "/",
+	    "criteria": {
+	        "interval": 5,
+	        "timeout": 5,
+	        "health-threshold": 2,
+	        "unhealth-threshold": 2
+	    }
+	}
+	```
+	
+## Architecture
+
+![alt text](./northbound.png)
+
+### View Layer
+
+The view layer is responsible for parsing the JSON request and dispatch the command to the corresponding models.
+
+### Model Layer
+
+In Django framework, a model is the single, definitive source of information about the data. It contains the essential fields and behaviors of the data. In our project, we have three models: project, subnet and instance. There is no difference between virtual machine implementation and docker container since we put the infrastructure dependent code in the utility functions.
+
+![alt text](./er.png)
+
+The project model stores user name and project name, it could manipulate the project namespace. The subnet model stores ip address of the subnet and a project foreigh key because the project table and subnet are one-to-many relationship. It could manipulate the subnet bridge. And instance model stores the backends ip and health check parameters. It is responsible for manipulating the instance(virtual machine). 
+
+
+### Utility functions
+
+The utility file defines some common used functions and execution logic of ansible scripts. The functions in model actually call the helper functions in utility to execute ansible scripts.
+
+### Health Checker
+
+For the virtual machine, we used the libvirt plugin of collectd framework to collect the real-time running status of each virtual machine. We checked the instances every interval seconds. After getting the status, controller could return it to the user as a real-time info request. And put it into the health check functions. That is, if  there are retries consecutive failures of the health check, the instance will be considered unhealthy.
+
+### Ansible
+We have five kinds of ansible scripts. 
+#### Namespace
+For creating namespace, we used ip command to created a new namespace, and attch it to the admin namespace using a veth pair. Then changed ip route to add default routing to the new veth pair, finally did a iptables SNAT operation.
+
+For deleting namespace, just shut down the related devices such as veth pairs then deleted them.
+
+#### L2 net
+For creating a new L2 network, we used virsh tool to define a new network based on template and used a veth pair to attach it to the project namespace.
+
+For deleteing the bridge, just make down it and then delete it using brctl.
+
+#### Instance
+For creating a new virtual machine, we cloned a new one from our template virtual machine. Then used virsh attach-interface to attach to the bridge. Then changed routing table using ip route to make the default interface be the new one.
+
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbMTc0OTY2ODMxNiwxMjk5MzEyODk2LDE3MT
+ExNTc5NTIsLTE5OTQ3NjgxOTgsMTM4NTIwNTAwNiwtMTg4NDg4
+Njc0NywtMTQwODUzOTc5LDE2NDE1OTYyNDUsNzMwOTk4MTE2XX
+0=
+-->

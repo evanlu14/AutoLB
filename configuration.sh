@@ -76,3 +76,6 @@ sudo ip route add default via 1.1.3.1 dev eth1
 # test
 ping 8.8.8.8
 
+
+# docker
+sudo docker network create --driver bridge --internal --subnet 172.28.100.0/24 --gateway 172.28.100.1 testbr1
