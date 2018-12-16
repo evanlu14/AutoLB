@@ -54,10 +54,6 @@ class VM(models.Model):
                     "ip": self.get_ins_ip()
                 }
         }
-        with open("LB/models/status/{}.json".format(self.get_ins_name()), "r") as f:
-            data = json.loads(f)
-            self.health_status = data['health_statue']
-            self.save()
             
         if self.health_status >= self.health_threshold:
             res["status"] = "unhealthy"
@@ -105,7 +101,7 @@ class VM(models.Model):
         #k = util.ThreadJob(self.checkstatus, event, self.health_interval)
         #k.start()
         print("[LOG]start monitoring")
-        t = threading.Thread(target=util.check_status, args=(self.get_ins_name(), self.health_interval), kwargs={})
+        t = threading.Thread(target=util.check_status, args=(self.get_ins_name(), self.health_interval, self.pk), kwargs={})
         t.setDaemon(True)
         t.start()
 

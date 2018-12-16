@@ -20,6 +20,7 @@ import time
 from random import randint
 import logging
 import docker
+from .vm import VM
 logger = logging.getLogger(__name__)
 
 cur_dir = os.path.abspath('./')
@@ -173,21 +174,21 @@ def graceful_chain_get(d, *args, default=None):
             return default
     return t
 
-def check_status(ins_name, interval):
+def check_status(ins_name, interval, pk):
     while True:
         print("check status of instance {}".format(ins_name))
         client = docker.from_env()
         container = client.containers.get(ins_name)
         x = container.stats(stream=False)
-        res = {'health_status': 0}
+        ins = VM.objects.get(pk=pk)
+
         if x['precpu_stats']['cpu_usage']['total_usage'] == 0:
-            res['health_status'] = res['health_status'] + 1
+            ins.health_status = ins.health_status + 1
         else:
-            res['health_status'] = 0
-            res['health_cpu_usage'] = calculate_cpu_percent(x)
-        filepath = "LB/models/status/{}.json".format(ins_name)
-        with open(filepath, "w") as f:
-            f.write(json.dumps(res,indent=2))
+            ins.health_status = 0
+            ins.health_cpu_usage = calculate_cpu_percent(x)
+        ins.save()
+
         time.sleep(interval)
 
 ###############################################################################
