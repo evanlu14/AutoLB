@@ -2,3 +2,5 @@
 .DS_Store
 Server/LB/migrations/*
 */log
+*.retry
+Server/LB/ansible/Subnet/*.xml
