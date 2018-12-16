@@ -101,10 +101,27 @@ class VM(models.Model):
         #k = util.ThreadJob(self.checkstatus, event, self.health_interval)
         #k.start()
         print("[LOG]start monitoring")
-        t = threading.Thread(target=util.check_status, args=(self.get_ins_name(), self.health_interval, self.pk), kwargs={})
+        t = threading.Thread(target=self.check_status, args=(self.get_ins_name(), self.health_interval, self.pk), kwargs={})
         t.setDaemon(True)
         t.start()
 
+    def check_status(self):
+        ins_name = self.get_ins_name()
+        interval = self.health_interval
+        while True:
+            print("check status of instance {}".format(ins_name))
+            client = docker.from_env()
+            container = client.containers.get(ins_name)
+            x = container.stats(stream=False)
+
+            if x['precpu_stats']['cpu_usage']['total_usage'] == 0:
+                self.health_status = self.health_status + 1
+            else:
+                self.health_status = 0
+                self.health_cpu_usage = util.calculate_cpu_percent(x)
+            self.save()
+
+            time.sleep(interval)
 
     # helper method
 
