@@ -42,7 +42,7 @@ class Project(models.Model):
     
     def removeproj(self):
         for subnet in self.subnet_set.all():
-            subnet.remove_br()
+            subnet.removebr()
             
         self.delete_ns()
         self.delete()

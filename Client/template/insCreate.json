@@ -1,14 +1,13 @@
 {
     "action": "create",
     "type": "instance",
-    "user": "dtest",
-    "project": "dproj3",
+    "user": "su2nt",
+    "project": "su2nn",
     "info": {
-        "traffic_type": "http",
-        "subnet": "202.132.25.0/24",
+        "subnet": "202.18.7.0/24",
         "backend": {
             "entities": [
-                "1.1.1.1", "2.2.2.2", "3.3.3.3"
+                "35.237.181.53", "35.196.112.92", "35.227.124.229"
             ],
             "health-check": false
         }

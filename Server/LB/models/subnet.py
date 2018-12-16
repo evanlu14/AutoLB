@@ -41,8 +41,8 @@ class Subnet(models.Model):
             return None
 
     def removebr(self):
-        for instance in self.instance_set.all():
-            instance.remove_ins()
+        for instance in self.vm_set.all():
+            instance.removeins()
         
         self.delete_br()
         self.delete()

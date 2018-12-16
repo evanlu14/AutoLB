@@ -89,7 +89,7 @@ def _create_br(br_name):
 def _attach_to_ns(br_name, ns_name, subnet_ip):
     print("attach bridge to namespace: {} -> {}".format(br_name, ns_name))
     gateway_ip = _generate_gateway_ip(subnet_ip)
-
+    
     playbook_path = os.path.join(ansible_path, 'Subnet/attach_net_to_ns.yml')
     extra_vars = {"br_name": br_name, "ns_name": ns_name, "gateway_ip": gateway_ip}
     _run_playbook(playbook_path, hosts_path, extra_vars)
@@ -121,9 +121,10 @@ def _attach_to_br(ins_name, br_name, ins_ip, subnet_ip):
     print("attach instance {} to bridge".format(ins_name))
 
     gateway_ip = _generate_gateway_ip(subnet_ip)
-    ns_pid = _get_docker_pid(ins_name)
+    gateway_ip = gateway_ip.split("/")[0]
+    ins_pid = _get_docker_pid(ins_name)
 
-    playbook_path = os.path.join(ansible_path, 'Container/create_ctn.yml')
+    playbook_path = os.path.join(ansible_path, 'Container/attach_to_br.yml')
     extra_vars = {"ins_name": ins_name, "br_name":br_name, "ins_ip":ins_ip, "gateway_ip":gateway_ip, "ins_ns_name":ins_pid}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
@@ -226,11 +227,12 @@ def _generate_gateway_ip(subnet_ip):
         ip_list[3] = "1"
     str_dot = "."
     gateway_ip = str_dot.join(ip_list)
+    gateway_ip = gateway_ip + "/" + subnet_ip.split("/")[1]
     return gateway_ip
 
 def _generate_ins_ip(subnet_ip, id):
     ip = subnet_ip.split("/")[0]
-    ip_list = ip.spli(".")
+    ip_list = ip.split(".")
     ip_list[3] = str(id + 10)
     str_dot = "."
     ins_ip = str_dot.join(ip_list)

@@ -44,7 +44,8 @@ def project(request):
 
     if(input["action"] == "delete"):
         print("project delete...")
-        Project().delete(input['user'], input['info']['name'])
+        project = Project.getby(input['user'], input['info']['name'])
+        project.removeproj()
         status = "successful"
 
 
@@ -83,8 +84,12 @@ def instance(request):
 
     if(input["action"] == "delete"):
         print("instance delete...")
-        VM().delete(input["info"]["name"])
-
+        try:
+            ins = VM.objects.get(pk=input["id"])
+            ins.removeins()
+        except VM.DoesNotExist:
+            res["type"]="failure"
+            res["info"]= "can not find instance"
     
     return HttpResponse(json.dumps(res))
 

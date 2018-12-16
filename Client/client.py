@@ -25,4 +25,3 @@ responseData = json.loads(res.content.decode('utf-8'))
 # print(responseData["info"])
 print(json.dumps(responseData, indent=2))
 
-curl -m1 35.237.181.53
