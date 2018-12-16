@@ -33,9 +33,8 @@ class VM(models.Model):
 
         return ins
 
-    def delete(self, name):
-        self.detach_to_ns(name)
-        self.delete_vm(name)
+    def removeins(self):
+        self.delete_vm()
 
     def info(self):
         res = {
@@ -53,67 +52,34 @@ class VM(models.Model):
         """ create a instance
         """
         ins_name = self.get_ins_name()
+        util._create_ins(ins_name)
+
         br_name = self.subnet.get_br_name()
-        util._create_ins(ins_name, br_name)
-
-    def attach_to_subnet(self):
-        """ create L2, attach vm to L2 and L2 to ns
-        """
-        net_name = name + 'net'
-        br_name = name + 'br'
-        template_net = net_name + '.xml'
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'Subnet/create_net.yml'))
-        extra_vars = {"net_name":net_name, "br_name": br_name, "template_net":template_net}
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
-
-        # generate vm and ns source ip
-        octets = []
-        source = "10."
-        for x in range(2):
-            octets.append(str(randint(0,255)))
-        source = source + '.'.join(octets)
-        ip_int3 = source + ".1"
-        ip_int3_n = ip_int3 + "/24"
-        ip_vm = source + ".2/24"
-
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/attach.yml'))
-        extra_vars = {"vm":name, "bridge_name":br_name, "target":name, "ip_int3":ip_int3_n }
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
-
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/config.yml'))
-        extra_vars = {"ip1":ip_vm, "ip2":ip_int3 }
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
-
+        ins_ip = self.get_ins_ip()
+        util._attach_to_br(ins_name, br_name, ins_ip, self.subnet.ip)
 
     def config_lb(self):
         """ config lb on vm
         """
-        pass
-        # playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'LB/config.yml'))
-        # extra_vars = {"s_ip":"192.168.162.1"}
-        # util._run_playbook(playbook_path, util.hosts_path, extra_vars)
+        ns_int_ip = self.subnet.project.ip[:-3]
+        ns_name = self.subnet.project.get_ns_name()
+        ins_name = self.get_ins_name()
+        ins_ip = self.get_ins_ip()
+        util._config_lb(self.port_num, ns_int_ip, ns_name, ins_name, ins_ip)
 
-    def detach_to_ns(self, name):
-        """ detach vm to L2, l2 to ns, delete l2
-        """
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/dettach.yml'))
-        mac_addr = util.get_mac(name)
-        extra_vars = {"target":name, "vm":name, "mac_addr": mac_addr}
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
+        backend_list = self.get_backends_list()
+        print(self.backends, backend_list)
+        for i in range(backend_list):
+            tot_num = len(backend_list)
+            bip = backend_list[i]
+            util._config_lb(ins_name, self.port_num, tot_num, i, bip, "22")
 
-        net_name = name + 'net'
-        br_name = name + 'br'
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'Subnet/delete_net.yml'))
-        extra_vars = {"net_name":net_name, "br_name": br_name}
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
-
-
-    def delete_vm(self, vm_name):
+    def delete_vm(self):
         """ delete the vm
         """
-        playbook_path = os.path.normpath(os.path.join(util.ansible_path, 'VM/delete.yml'))
-        extra_vars = {"target_vm": vm_name}
-        util._run_playbook(playbook_path, util.hosts_path, extra_vars)
+        util._delete_ins(self.ins_name)
+
+    # helper method
 
     def get_ins_name(self):
         project = self.subnet.get_project()
@@ -125,3 +91,17 @@ class VM(models.Model):
         while VM.objects.filter(port_num=port_num).exists():
             port_num = randint(10000, 20000)
         return port_num
+
+    def get_ins_ip(self):
+        return util._generate_ins_ip(self.subnet.ip, self.pk)
+
+    def get_backends_list(self):
+        back = self.backends[1:-1].split(",")
+        res = []
+        for x in back:
+            while x.startswith(("'", '"', ' ')):
+                x = x[1:]
+            while x.endswith(("'", '"')):
+                x = x[:-1]
+            res.append(x)
+        return res

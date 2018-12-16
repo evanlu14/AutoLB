@@ -1,0 +1,18 @@
+# ansible-playbook attach.yml --extra-vars "vm=vm_test bridge_name=br_test br_name=proj0 ip_int3=1.1.4.1/24"
+# validate: sudo ip netns exec {br_name_proj}ns ip link show
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: create a veth pair and attach br and namespace
+      command: "{{ item }}"
+      with_items: 
+        - ip link add {{br_name}}int3 type veth peer name {{br_name}}int4
+        - ip link set {{br_name}}int3 netns {{ns_name}}
+        - ip netns exec {{br_name}}ns ip addr add {{gateway_ip}} dev {{br_name}}int3        
+        - ip netns exec {{br_name}}ns ip link set dev {{br_name}}int3 up
+        - brctl addif {{br_name}} {{br_name}}int4
+        - ip link set dev {{br_name}} up
+        - ip link set dev {{br_name}}int4 up
+      become: yes
+      become_method: sudo

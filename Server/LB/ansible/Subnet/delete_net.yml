@@ -23,3 +23,8 @@
       command: brctl delbr "{{ br_name }}"
       become: yes
       become_method: sudo
+
+    - name: detach the bridge
+      command: ip link delete {{br_name}}int4
+      become: yes
+      become_method: sudo

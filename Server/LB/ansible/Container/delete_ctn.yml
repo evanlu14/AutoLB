@@ -1,0 +1,12 @@
+# ansible-playbook create.yml --extra-vars "ctn_name=vm_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: delete container 
+      command: "{{ item }}"
+      with_items: 
+        - docker container stop {{ins_name}}
+        - docker container rm {{ins_name}}
+      become: yes
+      become_method: sudo

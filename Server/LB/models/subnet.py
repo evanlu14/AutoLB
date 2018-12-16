@@ -73,7 +73,7 @@ class Subnet(models.Model):
 
     def create_br(self):
         br_name = self.get_br_name()
-        util._create_br(br_name, self.ip)
+        util._create_br(br_name)
 
         ns_name = self.project.get_ns_name()
         util._attach_to_ns(br_name, ns_name, self.ip)
