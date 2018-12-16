@@ -174,6 +174,17 @@ sudo ip netns exec adminns ip addr add 202.5.3.1/24 dev tint6
 sudo ip netns exec tns ip link set dev tint5 up
 sudo ip netns exec adminns ip link set dev tint6 up
 
+sudo ip netns exec tns ip route add default via 202.5.3.1 dev tint5
 sudo ip netns exec tns iptables -t nat -A POSTROUTING -s 202.5.2.0/24 -o tint5 -j MASQUERADE
 sudo ip netns exec adminns iptables -t nat -A POSTROUTING -s 202.5.3.0/24 -o adminint2 -j MASQUERADE
 sudo docker exec --privileged tctn ip route add default via 202.5.2.1 dev tint1
+
+sudo ip netns exec adminns iptables -t nat -A PREROUTING -p tcp -s 2.1.1.0/24 --dport 15001 -j DNAT --to-destination 202.5.3.2:15001
+sudo ip netns exec tns iptables -t nat -A PREROUTING -p tcp -s 2.1.1.0/24 --dport 15001 -j DNAT --to-destination 202.5.2.2:15001
+
+sudo docker exec --privileged tctn iptables -t nat -A PREROUTING -p tcp  -i tint1 --dport 15001  -m statistic --mode nth --every 3 --packet 1 -j DNAT --to-destination 35.196.112.92:80
+sudo docker exec --privileged tctn iptables -t nat -A PREROUTING -p tcp  -i tint1 --dport 15001  -m statistic --mode nth --every 3 --packet 0 -j DNAT --to-destination 35.237.181.53:80
+sudo docker exec --privileged tctn iptables -t nat -A PREROUTING -p tcp  -i tint1 --dport 15001  -m statistic --mode nth --every 3 --packet 2 -j DNAT --to-destination 35.227.124.229:80
+sudo docker exec --privileged tctn iptables -t nat -A POSTROUTING -o tint1 -j MASQUERADE
+
+sudo ip netns exec outside curl -m1 1.1.1.2:15001
