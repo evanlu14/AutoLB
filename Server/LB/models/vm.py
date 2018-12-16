@@ -101,7 +101,7 @@ class VM(models.Model):
         #k = util.ThreadJob(self.checkstatus, event, self.health_interval)
         #k.start()
         print("[LOG]start monitoring")
-        t = threading.Thread(target=self.check_status, args=(self.get_ins_name(), self.health_interval, self.pk), kwargs={})
+        t = threading.Thread(target=self.check_status, args=(), kwargs={})
         t.setDaemon(True)
         t.start()
 

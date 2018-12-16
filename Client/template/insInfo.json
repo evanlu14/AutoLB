@@ -1,6 +1,7 @@
 {
     "action": "info",
     "type": "instance",
+    "id": 19,
     "info": {
         "name": "instance-name"
     }
