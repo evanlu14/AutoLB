@@ -188,25 +188,6 @@ def graceful_chain_get(d, *args, default=None):
             return default
     return t
 
-class ThreadJob(threading.Thread):
-    def __init__(self,callback,event,interval):
-        '''runs the callback function after interval seconds
-
-        :param callback:  callback function to invoke
-        :param event: external event for controlling the update operation
-        :param interval: time in seconds after which are required to fire the callback
-        :type callback: function
-        :type interval: int
-        '''
-        self.callback = callback
-        self.event = event
-        self.interval = interval
-        super(ThreadJob,self).__init__()
-
-    def run(self):
-        while not self.event.wait(self.interval):
-            self.callback()
-
 def check_status(ins_name, interval):
     while True:
         print("check status of instance {}".format(ins_name))
@@ -220,7 +201,7 @@ def check_status(ins_name, interval):
             res['health_status'] = 0
             res['health_cpu_usage'] = calculate_cpu_percent(x)
             res['health_io_rx'], res['health_io_tx'] = calculate_network_bytes(x)
-        print(res)
+        # print(res)
         filepath = "LB/models/status/{}.json".format(ins_name)
         with open(filepath, "w") as f:
             f.write(json.dumps(res,indent=2))

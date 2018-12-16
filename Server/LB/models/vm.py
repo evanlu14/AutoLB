@@ -60,6 +60,10 @@ class VM(models.Model):
         with open("LB/models/status/{}.json".format(self.get_ins_name()), "r") as f:
             data = json.loads(f)
             self.health_status = data['health_statue']
+            self.health_cpu_usage = data['health_cpu_usage']
+            self.health_io_rx = data['health_io_rx']
+            self.health_io_tx = data['health_io_tx']
+            self.save()
             
         if self.health_status >= self.health_threshold:
             res["status"] = "unhealthy"
