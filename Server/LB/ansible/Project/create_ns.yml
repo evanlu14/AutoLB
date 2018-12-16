@@ -28,5 +28,6 @@
         - ip netns exec adminns ip addr add {{ ip_int2 }}/24 dev {{target}}int2
         - ip netns exec {{target}} ip route add default via {{ ip_int2 }}
         - ip netns exec adminns iptables -t nat -A POSTROUTING -s {{ source }} -o adminnsint2 -j MASQUERADE
+        - ip netns exec {{target}} iptables -t nat -A POSTROUTING -o {{target}}int1 -j MASQUERADE
       become: yes
       become_method: sudo

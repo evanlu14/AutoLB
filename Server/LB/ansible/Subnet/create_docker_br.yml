@@ -1,0 +1,14 @@
+# ansible-playbook create_ns.yml --extra-vars ""
+# validate by 
+#   1. sudo ip netns list
+#   2. sudo ip netns exec adminns ip link show
+#   3. sudo ip netns exec {target_proj}ns ip link show
+#   4. sudo ip netns exec {target_proj}ns ping 8.8.8.8
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: create bridge {{br_name}}
+      command: docker network create --driver bridge --subnet {{subnet_ip}} --gateway {{gateway_ip}} {{br_name}}
+      become: yes
+      become_method: sudo

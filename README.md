@@ -21,6 +21,9 @@ pip3 install ansible
 
 # django
 sudo pip3 install Django
+
+# docker
+pip3 install docker
 ```
 
 ### Installing

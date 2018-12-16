@@ -1,13 +1,12 @@
 from django.test import TestCase
 from .models.project import Project
+from .models.subnet import Subnet
+from .models import util
 import os
 
 class ProjectTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        # user = "utestusr"
-        # name = "utestproj"
-        # project = Project.create(user, name)
         pass
 
     def setUp(self):
@@ -40,20 +39,9 @@ class ProjectTests(TestCase):
         val2 =Project.getby("utestusr", "utestproj")
         self.assertIsNone(val2)
     
-    # def testgetall(self):
-    #     res = Project.listall()
-    #     print(res)
-
-    # def testremove(self):
-    #     tproj = Project.create("utestrm", "utestrm")
-    #     tproj.remove()
-    #     tproj2 = Project.get("utestrm", "utestrm")
-    #     self.assertIsNone(tproj2)
-    
-    # def testinfo(self):
-    #     project = Project.get("utestusr", "utestproj")
-    #     res = project.info()
-    #     print(res)
+    def testgetall(self):
+        res = Project.listall()
+        print(res)
 
     def tearDown(self):
         pass
@@ -63,3 +51,38 @@ class ProjectTests(TestCase):
         # project = Project.get("utestusr", "utestproj")
         # project.remove()
         pass
+
+class SubnetTests(TestCase):
+    def testall(self):
+        subnet = Subnet.create("102.10.1.0/24", "utestusr", "utestproj")
+        val = Subnet.getby("102.10.1.0/24", "utestusr", "utestproj")
+        self.assertIsNotNone(val)
+
+        res = val.info()
+        print(res)
+
+        val.removebr()
+        val2 = Subnet.getby("102.10.1.0/24", "utestusr", "utestproj")
+        self.assertIsNone(val2)
+
+class UtilsTests(TestCase):
+    def test_generate_ip(self):
+        print(util._generate_ip())
+        print(util._generate_ip())
+        print(util._generate_ip())
+
+    def test_generate_gateway_ip(self):
+        subnet_ip1 = "102.100.1.0/24"
+        self.assertEquals(util._generate_gateway_ip(subnet_ip1), "102.100.1.1")
+        
+        subnet_ip1 = "102.100.1.0/16"
+        self.assertEquals(util._generate_gateway_ip(subnet_ip1), "102.100.0.1")
+    
+    def test_get_docker_network_id(self):
+        br_name = "testbr1"
+        id = util._get_docker_network_id(br_name)
+        self.assertAlmostEquals(id, 'e4320b435139669bbd681508a8f43e77d9e521b6a958dd8f43336efd09713e52')
+
+        br_name = "testbr101"
+        id2 = util._get_docker_network_id(br_name)
+        self.assertIsNone(id2)

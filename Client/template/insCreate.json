@@ -2,10 +2,10 @@
     "action": "create",
     "type": "instance",
     "user": "dtest",
-    "project": "dproj",
+    "project": "dproj3",
     "info": {
         "traffic_type": "http",
-        "subnet": "1.1.1.0/24",
+        "subnet": "202.132.25.0/24",
         "backend": {
             "entities": [
                 "1.1.1.1", "2.2.2.2", "3.3.3.3"

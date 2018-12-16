@@ -3,8 +3,8 @@ from . import util
 import logging
 from random import randint
 logger = logging.getLogger(__name__)
-# logging.basicConfig(filename="./log",filemode='a')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%a, %d %b %Y %H:%M:%S', filename='log', filemode='a')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s', 
+    datefmt='%a, %d %b %Y %H:%M:%S', filename='log', filemode='a')
 MAX_NAME_LENGTH = 50
 class Project(models.Model):
     user = models.CharField(max_length=MAX_NAME_LENGTH)
@@ -35,17 +35,14 @@ class Project(models.Model):
     def getby(cls, user, name):
         try:
             project = Project.objects.get(user=user, name=name)
+            return project
         except Project.DoesNotExist:
             logger.debug("delete unexisted project")
             return None
-
-        return project
     
     def removeproj(self):
         for subnet in self.subnet_set.all():
-            for vm in subnet.vm_set.all():
-                vm.delete()
-            subnet.delete()
+            subnet.remove_br()
             
         self.delete_ns()
         self.delete()
@@ -57,14 +54,17 @@ class Project(models.Model):
                 "user": self.user,
                 "name": self.name,
                 "subnet": [],
-                "ip": self.ip
+                "network_namespace": {
+                    "name": self.get_ns_name(),
+                    "ip": self.ip,
+                }
         }
         for subnet in self.subnet_set.all():
             res["subnet"].append(subnet.info())
         return res
 
     def __str__(self):
-        return "id: " + str(self.pk) + ", user: " + self.user + ", name: " + self.name 
+        return "id: {}, user: {}, name: {}, ip: {}".format(self.pk, self.user, self.name, self.ip)
 
     # helper function
     def create_ns(self):

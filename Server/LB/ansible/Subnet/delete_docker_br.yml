@@ -1,0 +1,19 @@
+# ansible-playbook delete_ns.yml --extra-vars "target_proj=proj0 ip=102.1.1.1/24"
+# validate by sudo ip netns list
+---
+- hosts: localhost
+  gather_facts: no
+  vars: 
+    target: "{{ target_proj }}"
+  tasks:
+    - name: delete project namespace veth pair
+      command: "{{ item }}"
+      with_items: 
+        - ip link delete {{br_name}}int2
+      become: yes
+      become_method: sudo
+
+    - name: Delete docker bridge
+      command: docker network rm {{br_name}}
+      become: yes
+      become_method: sudo

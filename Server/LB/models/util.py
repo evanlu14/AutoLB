@@ -16,14 +16,21 @@ import hashlib
 
 from random import randint
 import logging
+import docker
 logger = logging.getLogger(__name__)
 
 cur_dir = os.path.abspath('./')
 ansible_path = os.path.normpath(os.path.join(cur_dir, 'LB/ansible/'))
 hosts_path = os.path.normpath(os.path.join(ansible_path, 'hosts'))
 
+DEBUG = 1
+###############################################################################
 # namespace
+###############################################################################
+
 def _create_ns(ns_name, source):
+    if DEBUG:
+        print("[DEBUG]create network namespace: {}".format(ns_name))
     playbook_path = os.path.join(ansible_path, 'Project/create_ns.yml')
 
     source = source.split("/")[0]
@@ -46,6 +53,7 @@ def _create_ns(ns_name, source):
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
 def _remove_ns(ns_name, ip):
+    print("remove network namespace: {}".format(ns_name))
     playbook_path = os.path.join(ansible_path, 'Project/delete_ns.yml')
     extra_vars = {"target_proj":ns_name, "ip":ip}
     _run_playbook(playbook_path, hosts_path, extra_vars)
@@ -56,16 +64,65 @@ def _get_ns_name(user, proj_name, id):
     # return hashlib.sha224((user + proj_name + id).encode('ascii')).hexdigest()[:5]
     return user[:3] + proj_name[:3] + id
 
+###############################################################################
+# subnet
+###############################################################################
+
+def _get_br_name(proj_name, id):
+    if isinstance(id, int):
+        id = str(id)
+    # return hashlib.sha224((user + proj_name + id).encode('ascii')).hexdigest()[:5]
+    return proj_name[:3] + "br" + id
+
+def _create_br(br_name, subnet_ip):
+    """ subnet_ip example: 1.1.1.1/24
+    """
+    print("create bridge: {}".format(br_name))
+    gateway_ip = _generate_gateway_ip(subnet_ip)
+    playbook_path = os.path.join(ansible_path, 'Subnet/create_docker_br.yml')
+    extra_vars = {"br_name": br_name, "gateway_ip": gateway_ip,"subnet_ip": subnet_ip}
+    _run_playbook(playbook_path, hosts_path, extra_vars)
+
+def _attach_to_ns(br_name, ns_name, subnet_ip):
+    print("attach bridge to namespace: {} -> {}".format(br_name, ns_name))
+    br_id = _get_docker_network_id(br_name)
+    real_br_name = "br-" + br_id[:12]
+
+    veth_ip = _generate_gateway_ip(subnet_ip) + "01"
+
+    playbook_path = os.path.join(ansible_path, 'Subnet/attach_docker_br_to_ns.yml')
+    extra_vars = {"br_name": br_name, "real_br_name": real_br_name,"ns_name": ns_name, "subnet_ip": subnet_ip, "veth_ip":veth_ip}
+    _run_playbook(playbook_path, hosts_path, extra_vars)
+
+def _delete_br(br_name):
+    print("delete bridge: {}".format(br_name))
+    playbook_path = os.path.join(ansible_path, 'Subnet/delete_docker_br.yml')
+    extra_vars = {"br_name": br_name}
+    _run_playbook(playbook_path, hosts_path, extra_vars)
+
+###############################################################################
 # vm
+###############################################################################
+
 def _create_vm(vm_name):
     playbook_path = os.path.join(ansible_path, 'VM/create.yml')
     extra_vars = {"target_vm": vm_name}
     _run_playbook(playbook_path, hosts_path, extra_vars)
 
+def _create_ins(ins_name, br_name):
+    """ create a new docker container
+    """
+    print("create instance: {}".format(ins_name))
+    playbook_path = os.path.join(ansible_path, 'Container/create_ctn.yml')
+    extra_vars = {"ctn_name": ins_name, "br_name": br_name}
+    _run_playbook(playbook_path, hosts_path, extra_vars)
+
 def _get_vm_name(user, proj_name, id):
     return _get_ns_name(user, proj_name, id)
-    # return user + proj_name + id
 
+def _get_ins_name(user, proj_name, id):
+    return _get_ns_name(user, proj_name, id)
+    
 def _collectd_info(vm_name):
     res = {"if": {}, "memory": [], "cpu": []}
 
@@ -206,6 +263,10 @@ def get_mac(hostname):
         return ""
     return target_mac_addr[0]
 
+###############################################################################
+# helper
+###############################################################################
+
 def _generate_ip():
     octets = []
     source = "102."
@@ -214,3 +275,29 @@ def _generate_ip():
     source = source + '.'.join(octets)
     source = source + ".0/24"
     return source
+
+def _generate_gateway_ip(subnet_ip):
+    ip = subnet_ip.split("/")[0]
+    mask = int(subnet_ip.split("/")[1])
+    ip_list = ip.split(".")
+    if mask == 24:
+        ip_list[3] = "1"
+    elif mask == 16:
+        ip_list[2] = "0"
+        ip_list[3] = "1"
+    elif mask == 8:
+        ip_list[1] = "0"
+        ip_list[2] = "0"
+        ip_list[3] = "1"
+    str_dot = "."
+    gateway_ip = str_dot.join(ip_list)
+    return gateway_ip
+
+def _get_docker_network_id(br_name):
+    client = docker.from_env() 
+    try:
+        id = client.networks.get(network_id=br_name).id
+        return id
+    except docker.errors.NotFound:
+        logger.debug("util._get_docker_network_id: not found by name")
+        return None
