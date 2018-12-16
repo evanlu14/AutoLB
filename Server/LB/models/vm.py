@@ -20,9 +20,6 @@ class VM(models.Model):
     health_threshold = models.IntegerField(null=True)
 
     health_status = models.IntegerField(default=0)
-    health_cpu_usage = models.FloatField(default=0)
-    health_io_rx = models.IntegerField(default=0)
-    health_io_tx = models.IntegerField(default=0)
 
     @classmethod
     def create(cls, user, proj_name, subnet_ip, backends, healthcheck, health_interval, health_timeout, health_threshold):
@@ -60,18 +57,12 @@ class VM(models.Model):
         with open("LB/models/status/{}.json".format(self.get_ins_name()), "r") as f:
             data = json.loads(f)
             self.health_status = data['health_statue']
-            self.health_cpu_usage = data['health_cpu_usage']
-            self.health_io_rx = data['health_io_rx']
-            self.health_io_tx = data['health_io_tx']
             self.save()
             
         if self.health_status >= self.health_threshold:
             res["status"] = "unhealthy"
         else:
             res["status"] = "healthy"
-            res["cpu_usage"] = self.health_cpu_usage
-            res["received_bytes"] = self.health_io_rx
-            res["transceived_bytes"] = self.health_io_tx
         return res
 
     def create_ins(self):

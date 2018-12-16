@@ -163,21 +163,6 @@ def calculate_cpu_percent(d):
         cpu_percent = cpu_delta / system_delta * 100.0 * cpu_count
     return cpu_percent
 
-def calculate_network_bytes(d):
-    """
-    :param d:
-    :return: (received_bytes, transceived_bytes)
-    """
-    networks = graceful_chain_get(d, "networks")
-    if not networks:
-        return 0, 0
-    r = 0
-    t = 0
-    for if_name, data in networks.items():
-        r += data["rx_bytes"]
-        t += data["tx_bytes"]
-    return r, t
-
 def graceful_chain_get(d, *args, default=None):
     t = d
     for a in args:
@@ -200,16 +185,11 @@ def check_status(ins_name, interval):
         else:
             res['health_status'] = 0
             res['health_cpu_usage'] = calculate_cpu_percent(x)
-            res['health_io_rx'], res['health_io_tx'] = calculate_network_bytes(x)
-        # print(res)
         filepath = "LB/models/status/{}.json".format(ins_name)
         with open(filepath, "w") as f:
             f.write(json.dumps(res,indent=2))
         time.sleep(interval)
-            # print({
-            #     "cpu": "%.6f" % util.calculate_cpu_percent(x),
-            #     "network": util.calculate_network_bytes(x)
-            # })
+
 ###############################################################################
 # helper
 ###############################################################################
