@@ -15,6 +15,8 @@ from ansible.executor.playbook_executor import PlaybookExecutor
 import hashlib
 
 import threading
+import json
+import time
 from random import randint
 import logging
 import docker
@@ -205,6 +207,28 @@ class ThreadJob(threading.Thread):
         while not self.event.wait(self.interval):
             self.callback()
 
+def check_status(ins_name, interval):
+    while True:
+        print("check status of instance {}".format(ins_name))
+        client = docker.from_env()
+        container = client.containers.get(ins_name)
+        x = container.stats(stream=False)
+        res = {'health_status': 0}
+        if x['precpu_stats']['cpu_usage']['total_usage'] == 0:
+            res['health_status'] = res['health_status'] + 1
+        else:
+            res['health_status'] = 0
+            res['health_cpu_usage'] = calculate_cpu_percent(x)
+            res['health_io_rx'], res['health_io_tx'] = calculate_network_bytes(x)
+        print(res)
+        filepath = "LB/models/status/{}.json".format(ins_name)
+        with open(filepath, "w") as f:
+            f.write(json.dumps(res,indent=2))
+        time.sleep(interval)
+            # print({
+            #     "cpu": "%.6f" % util.calculate_cpu_percent(x),
+            #     "network": util.calculate_network_bytes(x)
+            # })
 ###############################################################################
 # helper
 ###############################################################################

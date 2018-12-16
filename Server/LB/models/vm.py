@@ -57,6 +57,10 @@ class VM(models.Model):
                     "ip": self.get_ins_ip()
                 }
         }
+        with open("LB/models/status/{}.json".format(self.get_ins_name()), "r") as f:
+            data = json.loads(f)
+            self.health_status = data['health_statue']
+            
         if self.health_status >= self.health_threshold:
             res["status"] = "unhealthy"
         else:
@@ -100,28 +104,16 @@ class VM(models.Model):
         util._delete_ins(ins_name)
         self.delete()
 
-    def check(self):
-        client = docker.from_env()
-        container = client.containers.get(self.get_ins_name())
-        x = container.stats(stream=False)
-        # with open('ctn.json', 'w') as f:
-        #     f.write(json.dumps(x,indent=2))
-        if x['precpu_stats']['cpu_usage']['total_usage'] == 0:
-            self.health_status = self.health_status + 1
-        else:
-            self.health_status = 0
-            self.health_cpu_usage = util.calculate_cpu_percent(x)
-            self.health_io_rx, self.health_io_tx = util.calculate_network_bytes(x)
-        self.save()
-            # print({
-            #     "cpu": "%.6f" % util.calculate_cpu_percent(x),
-            #     "network": util.calculate_network_bytes(x)
-            # })
 
     def monitor(self):
-        event = threading.Event()
-        k = util.ThreadJob(self.check, event, self.health_interval)
-        k.start()
+        #event = threading.Event()
+        #k = util.ThreadJob(self.checkstatus, event, self.health_interval)
+        #k.start()
+        print("[LOG]start monitoring")
+        t = threading.Thread(target=util.check_status, args=(self.get_ins_name(), self.health_interval), kwargs={})
+        t.setDaemon(True)
+        t.start()
+
 
     # helper method
 

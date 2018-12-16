@@ -81,8 +81,14 @@ def instance(request):
             )
         res["info"] = instance.info()
 
-    # if(input["action"] == "info"):
-    #     print("instance info...")
+    if (input["action"] == "info"):
+        print("instance info...")
+        try:
+            ins = VM.objects.get(pk=input["id"])
+            res["info"] = ins.info()
+        except VM.DoesNotExist:
+            res["type"] = "failure"
+            res["info"] = "can not find instance"
     # if(input["action"] == "update"):
     #     print("instance update...")
 
