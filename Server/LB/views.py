@@ -74,11 +74,21 @@ def instance(request):
         # user, proj_name, subnet_ip, backends, healthcheck
         instance = VM.create(input["user"], input["project"], input["info"]["subnet"], 
             input["info"]["backend"]["entities"], 
-            input["info"]["backend"]["health-check"])
+            input["info"]["backend"]["health-check"]["up"],
+            input["info"]["backend"]["health-check"]["interval"],
+            input["info"]["backend"]["health-check"]["timeout"],
+            input["info"]["backend"]["health-check"]["threshold"]
+            )
         res["info"] = instance.info()
 
-    # if(input["action"] == "info"):
-    #     print("instance info...")
+    if (input["action"] == "info"):
+        print("instance info...")
+        try:
+            ins = VM.objects.get(pk=input["id"])
+            res["info"] = ins.info()
+        except VM.DoesNotExist:
+            res["type"] = "failure"
+            res["info"] = "can not find instance"
     # if(input["action"] == "update"):
     #     print("instance update...")
 

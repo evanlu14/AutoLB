@@ -9,7 +9,12 @@
             "entities": [
                 "35.237.181.53", "35.196.112.92", "35.227.124.229"
             ],
-            "health-check": false
+            "health-check": {
+                "up": true,
+                "interval": 5,
+                "timeout": 5,
+                "threshold": 2
+            }
         }
     }
 }
