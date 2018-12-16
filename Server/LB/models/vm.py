@@ -6,6 +6,8 @@ from . import util
 from random import randint
 import time
 import subprocess
+import threading
+import docker
 
 MAX_NAME_LENGTH = 50
 class VM(models.Model):
@@ -13,14 +15,24 @@ class VM(models.Model):
     backends = models.TextField(null=True) # JSON-serialized, like ['192.168.1.1', '192.168.1.2']
     healthcheck = models.BooleanField(default=False)
     port_num = models.IntegerField(null=True)
+    health_interval = models.IntegerField(null=True)
+    health_timeout = models.IntegerField(null=True)
+    health_threshold = models.IntegerField(null=True)
+
+    health_status = models.IntegerField(default=0)
+    health_cpu_usage = models.FloatField(default=0)
+    health_io_rx = models.IntegerField(default=0)
+    health_io_tx = models.IntegerField(default=0)
 
     @classmethod
-    def create(cls, user, proj_name, subnet_ip, backends, healthcheck):
+    def create(cls, user, proj_name, subnet_ip, backends, healthcheck, health_interval, health_timeout, health_threshold):
         """ create a new VM
         """
         subnet = Subnet.create(ip=subnet_ip, user=user, proj_name=proj_name)
 
-        ins = VM(subnet=subnet, backends=backends, healthcheck=healthcheck)
+        ins = VM(subnet=subnet, backends=backends, healthcheck=healthcheck, 
+            health_interval=health_interval, health_timeout=health_timeout, 
+            health_threshold=health_threshold)
         port_num = ins.get_port_number()
         ins.port_num = port_num
         ins.save()
@@ -28,6 +40,7 @@ class VM(models.Model):
         ins.create_ins()
         ins.config_lb()
 
+        ins.monitor()
         return ins
 
     def removeins(self):
@@ -44,6 +57,13 @@ class VM(models.Model):
                     "ip": self.get_ins_ip()
                 }
         }
+        if self.health_status >= self.health_threshold:
+            res["status"] = "unhealthy"
+        else:
+            res["status"] = "healthy"
+            res["cpu_usage"] = self.health_cpu_usage
+            res["received_bytes"] = self.health_io_rx
+            res["transceived_bytes"] = self.health_io_tx
         return res
 
     def create_ins(self):
@@ -79,6 +99,29 @@ class VM(models.Model):
         ins_name = self.get_ins_name()
         util._delete_ins(ins_name)
         self.delete()
+
+    def check(self):
+        client = docker.from_env()
+        container = client.containers.get(self.get_ins_name())
+        x = container.stats(stream=False)
+        # with open('ctn.json', 'w') as f:
+        #     f.write(json.dumps(x,indent=2))
+        if x['precpu_stats']['cpu_usage']['total_usage'] == 0:
+            self.health_status = self.health_status + 1
+        else:
+            self.health_status = 0
+            self.health_cpu_usage = util.calculate_cpu_percent(x)
+            self.health_io_rx, self.health_io_tx = util.calculate_network_bytes(x)
+        self.save()
+            # print({
+            #     "cpu": "%.6f" % util.calculate_cpu_percent(x),
+            #     "network": util.calculate_network_bytes(x)
+            # })
+
+    def monitor(self):
+        event = threading.Event()
+        k = util.ThreadJob(self.check, event, self.health_interval)
+        k.start()
 
     # helper method
 
