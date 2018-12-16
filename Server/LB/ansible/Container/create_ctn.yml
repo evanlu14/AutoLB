@@ -1,0 +1,9 @@
+# ansible-playbook create.yml --extra-vars "ctn_name=vm_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: build from Dockerfile
+      command: docker run -itd --name {{ ctn_name }} --network none myubuntu
+      become: yes
+      become_method: sudo 

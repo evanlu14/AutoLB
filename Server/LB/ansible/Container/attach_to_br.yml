@@ -1,0 +1,17 @@
+# ansible-playbook create.yml --extra-vars "ctn_name=vm_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: configure port_num in namespace
+      command: "{{ item }}"
+      with_items: 
+        - ip link add {{ins_name}}int1 type veth peer name {{ins_name}}int2
+        - ip link set {{ins_name}}int2 netns {{ins_ns_name}}
+        - brctl addif {{br_name}} {{ins_name}}int1
+        - docker exec --privileged {{ins_name}} ip addr add {{ins_ip}}/24 dev {{ins_name}}int2
+        - docker exec --privileged {{ins_name}} ip link set {{ins_name}}int2 up
+        - ip link set {{ins_name}}int1 up
+        - docker exec --privileged {{ins_name}} ip route add default via {{gateway_ip}} dev {{ins_name}}int2
+      become: yes
+      become_method: sudo 

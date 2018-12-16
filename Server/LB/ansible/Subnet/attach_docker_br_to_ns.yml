@@ -1,0 +1,22 @@
+# ansible-playbook create_ns.yml --extra-vars "target_proj=proj0 ip_int1=1.1.3.2/24 ip_int2=1.1.3.1/24 source=1.1.3.0/24"
+# validate by 
+#   1. sudo ip netns list
+#   2. sudo ip netns exec adminns ip link show
+#   3. sudo ip netns exec {target_proj}ns ip link show
+#   4. sudo ip netns exec {target_proj}ns ping 8.8.8.8
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: attach to project namespace
+      command: "{{ item }}"
+      with_items: 
+        - ip link add {{br_name}}int1 type veth peer name {{br_name}}int2
+        - ip link set {{br_name}}int1 netns {{ns_name}}
+        - ip netns exec {{ns_name}} ip addr add {{veth_ip}} dev {{br_name}}int1
+        - ip netns exec {{ns_name}} ip link set dev {{br_name}}int1 up
+        - brctl addif {{real_br_name}} {{br_name}}int2
+        - ip link set dev {{br_name}}int2 up
+        - ip netns exec {{ns_name}} ip route add {{subnet_ip}} dev {{br_name}}int1 src {{veth_ip}}
+      become: yes
+      become_method: sudo

@@ -1,0 +1,13 @@
+# ansible-playbook create.yml --extra-vars "ctn_name=vm_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: configure port_num in namespace
+      command: "{{ item }}"
+      with_items: 
+        - ip netns exec adminns iptables -t nat -A PREROUTING -p tcp -s 2.1.1.0/24 --dport {{port_num}} -j DNAT --to-destination {{ns_int_ip}}:{{port_num}}
+        - ip netns exec {{ns_name}} iptables -t nat -A PREROUTING -p tcp -s 2.1.1.0/24 --dport {{port_num}} -j DNAT --to-destination {{ins_ip}}:{{port_num}}
+        - docker exec --privileged {{ins_name}} iptables -t nat -A POSTROUTING -o {{ins_name}}int2 -j MASQUERADE
+      become: yes
+      become_method: sudo 

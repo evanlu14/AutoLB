@@ -7,7 +7,7 @@ fileAddress = os.path.abspath(sys.argv[1])
 with open(fileAddress) as f:
     data = json.load(f)
 
-server = "http://localhost:4000"
+server = "http://localhost:" + sys.argv[2]
 url = server + "/LB/" + data["type"] + "/"
 headers = {
     'Content-type': 'application/json', 
@@ -17,10 +17,11 @@ body = data
 
 res = requests.post(url, data=json.dumps(body), headers=headers)
 
-# responseData = json.loads(res.content)
+responseData = json.loads(res.content.decode('utf-8'))
 # print("Request type: " + responseData["type"])
 # print("Request action: " + responseData["action"])
 # print("Request Status: " + responseData["status"])
 # print("Response:")
 # print(responseData["info"])
-print(res.content)
+print(json.dumps(responseData, indent=2))
+

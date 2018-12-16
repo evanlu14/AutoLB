@@ -1,0 +1,11 @@
+# ansible-playbook create.yml --extra-vars "ctn_name=vm_test"
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: configure port_num in namespace
+      command: "{{ item }}"
+      with_items: 
+        - docker exec --privileged {{ins_name}} iptables -t nat -A PREROUTING -p tcp  -i {{ins_name}}int2 --dport {{port_num}}  -m statistic --mode nth --every {{tot_num}} --packet {{num}} -j DNAT --to-destination {{backend_ip}}:{{backend_port}}
+      become: yes
+      become_method: sudo 
