@@ -1,7 +1,7 @@
 
-# CSC792 Linux Networking
+# Load Balancer as a Service
 
-A load balance as a service scheme.
+A single-node version load balancer as a service.
 
 ## Getting Started
 
@@ -57,11 +57,6 @@ sudo ip netns add admin_ns
 ## Contributing
 
 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Authors
-
-* **Anran Zhou** - [AnranZhou](https://github.com/AnranZhou)
-* **Zecao Lu**
 
 ## License
 
