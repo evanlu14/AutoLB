@@ -1,14 +1,14 @@
 language: python
 python:
   - "3.5"
-services:
-  - mysql
+# services:
+#   - mysql
 env:
-  - DJANGO=1.8 DB=mysql
+  - DJANGO=1.8 
 before_install:
-  - sudo apt update
-  - sudo apt install qemu-kvm libvirt-bin virt-manager virt-viewer virtinst
-  - sudo apt install libvirt-python libvirt-dev
+  - sudo apt-get update
+  - sudo apt-get install qemu-kvm libvirt-bin virt-manager virt-viewer virtinst
+  - sudo apt-get install libvirt-python libvirt-dev
   - pip3 install libvirt-python
   - sudo apt-get install ansible libssl-dev
   - pip3 install ansible
